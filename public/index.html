@@ -1,0 +1,1102 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Cine Ultimate — Checkout Oficial de Acesso</title>
+  <meta name="description" content="Libere seu acesso completo ao Cine Ultimate com pagamento único via PIX de R$ 29,00." />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --bg: #090b10;
+      --card-bg: #121620;
+      --card-border: rgba(255, 255, 255, 0.08);
+      --accent: #22c55e;
+      --accent-glow: rgba(34, 197, 94, 0.25);
+      --accent-hover: #16a34a;
+      --danger: #ef4444;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --input-bg: #1a202c;
+      --input-border: rgba(255, 255, 255, 0.12);
+      --radius: 16px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      padding: 24px 16px 40px;
+      background-image: 
+        radial-gradient(circle at 50% 0%, rgba(34, 197, 94, 0.12) 0%, transparent 60%),
+        radial-gradient(circle at 10% 100%, rgba(220, 38, 38, 0.08) 0%, transparent 50%);
+      background-attachment: fixed;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 440px;
+      margin: 0 auto;
+    }
+
+    /* Top Brand */
+    .brand-header {
+      text-align: center;
+      margin-bottom: 24px;
+    }
+
+    .brand-logo {
+      height: 48px;
+      max-width: 220px;
+      object-fit: contain;
+      filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.6));
+    }
+
+    .brand-title {
+      font-size: 24px;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      background: linear-gradient(135deg, #ffffff 40%, #a7f3d0 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .security-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(34, 197, 94, 0.1);
+      border: 1px solid rgba(34, 197, 94, 0.25);
+      color: #4ade80;
+      padding: 6px 12px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 600;
+      margin-top: 8px;
+    }
+
+    /* Main Card */
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: var(--radius);
+      padding: 24px 20px;
+      box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.7);
+      backdrop-filter: blur(12px);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, #22c55e, #10b981, #059669);
+    }
+
+    /* Plan Header */
+    .plan-summary {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 22px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .plan-info h2 {
+      font-size: 16px;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    .plan-info p {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    .plan-price {
+      text-align: right;
+    }
+
+    .plan-price .val {
+      font-size: 22px;
+      font-weight: 800;
+      color: #22c55e;
+      letter-spacing: -0.5px;
+    }
+
+    .plan-price .tag {
+      font-size: 10px;
+      text-transform: uppercase;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      color: #94a3b8;
+    }
+
+    /* Feature bullets */
+    .features-list {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-bottom: 22px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    .feature-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      color: #cbd5e1;
+      font-weight: 500;
+    }
+
+    .feature-item svg {
+      width: 14px;
+      height: 14px;
+      color: #22c55e;
+      flex-shrink: 0;
+    }
+
+    /* Form Fields */
+    .form-group {
+      margin-bottom: 16px;
+      text-align: left;
+    }
+
+    .form-label {
+      display: block;
+      font-size: 13px;
+      font-weight: 600;
+      color: #e2e8f0;
+      margin-bottom: 6px;
+    }
+
+    .form-label span.req {
+      color: var(--accent);
+    }
+
+    .form-hint {
+      font-size: 11px;
+      color: #94a3b8;
+      margin-top: 4px;
+      line-height: 1.4;
+    }
+
+    .form-control {
+      width: 100%;
+      height: 48px;
+      background: var(--input-bg);
+      border: 1px solid var(--input-border);
+      border-radius: 10px;
+      padding: 0 14px;
+      color: #fff;
+      font-size: 15px;
+      font-weight: 500;
+      transition: all 0.2s ease;
+      outline: none;
+    }
+
+    .form-control:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px var(--accent-glow);
+    }
+
+    .form-control::placeholder {
+      color: #64748b;
+    }
+
+    /* Buttons */
+    .btn-submit {
+      width: 100%;
+      height: 52px;
+      background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+      color: #ffffff;
+      border: none;
+      border-radius: 12px;
+      font-size: 16px;
+      font-weight: 700;
+      letter-spacing: -0.2px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      box-shadow: 0 8px 24px -6px var(--accent-glow);
+      transition: all 0.2s ease;
+      margin-top: 20px;
+    }
+
+    .btn-submit:hover:not(:disabled) {
+      transform: translateY(-1px);
+      box-shadow: 0 12px 28px -6px rgba(34, 197, 94, 0.4);
+    }
+
+    .btn-submit:active:not(:disabled) {
+      transform: translateY(1px);
+    }
+
+    .btn-submit:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    /* Alert Warning */
+    .alert-important {
+      background: rgba(234, 179, 8, 0.12);
+      border: 1px solid rgba(234, 179, 8, 0.45);
+      border-radius: 12px;
+      padding: 14px;
+      margin-bottom: 18px;
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+      text-align: left;
+    }
+
+    .alert-important-icon {
+      font-size: 22px;
+      line-height: 1;
+      flex-shrink: 0;
+    }
+
+    .alert-important-body strong {
+      display: block;
+      color: #fde047;
+      font-size: 13px;
+      font-weight: 700;
+      margin-bottom: 4px;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+    }
+
+    .alert-important-body p {
+      font-size: 12px;
+      color: #fef08a;
+      line-height: 1.45;
+      margin: 0;
+    }
+
+    /* Error Message */
+    .alert-error {
+      background: rgba(239, 68, 68, 0.12);
+      border: 1px solid rgba(239, 68, 68, 0.3);
+      color: #fca5a5;
+      padding: 12px;
+      border-radius: 10px;
+      font-size: 13px;
+      font-weight: 500;
+      margin-bottom: 16px;
+      display: none;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* ─── TELA 2: PIX GERADO ─── */
+    .pix-view {
+      display: none;
+      text-align: center;
+    }
+
+    .pix-title {
+      font-size: 18px;
+      font-weight: 700;
+      margin-bottom: 4px;
+      color: #fff;
+    }
+
+    .pix-subtitle {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-bottom: 18px;
+    }
+
+    .qr-container {
+      background: #ffffff;
+      padding: 14px;
+      border-radius: 14px;
+      display: inline-block;
+      margin: 0 auto 16px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+    }
+
+    .qr-container img {
+      width: 200px;
+      height: 200px;
+      display: block;
+    }
+
+    .btn-copy {
+      width: 100%;
+      height: 48px;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      color: #fff;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      cursor: pointer;
+      transition: all 0.2s;
+      margin-bottom: 12px;
+    }
+
+    .btn-copy:hover {
+      background: rgba(255, 255, 255, 0.14);
+    }
+
+    .pix-code-preview {
+      background: #0f131a;
+      border: 1px dashed rgba(255, 255, 255, 0.15);
+      padding: 10px 12px;
+      border-radius: 8px;
+      font-family: monospace;
+      font-size: 11px;
+      color: #94a3b8;
+      word-break: break-all;
+      max-height: 52px;
+      overflow-y: auto;
+      margin-bottom: 18px;
+    }
+
+    .status-pulse {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      color: #38bdf8;
+      background: rgba(56, 189, 248, 0.08);
+      border: 1px solid rgba(56, 189, 248, 0.2);
+      padding: 10px 14px;
+      border-radius: 10px;
+      margin-top: 10px;
+    }
+
+    .pulse-dot {
+      width: 8px;
+      height: 8px;
+      background: #38bdf8;
+      border-radius: 50%;
+      box-shadow: 0 0 0 0 rgba(56, 189, 248, 0.7);
+      animation: pulse 1.6s infinite;
+    }
+
+    @keyframes pulse {
+      0% {
+        transform: scale(0.95);
+        box-shadow: 0 0 0 0 rgba(56, 189, 248, 0.7);
+      }
+      70% {
+        transform: scale(1);
+        box-shadow: 0 0 0 8px rgba(56, 189, 248, 0);
+      }
+      100% {
+        transform: scale(0.95);
+        box-shadow: 0 0 0 0 rgba(56, 189, 248, 0);
+      }
+    }
+
+    /* ─── TELA 3: PAGAMENTO APROVADO / SUCESSO ─── */
+    .success-view {
+      display: none;
+      text-align: center;
+      padding: 10px 0;
+      animation: fadeIn 0.4s ease-out;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .success-icon-wrap {
+      width: 76px;
+      height: 76px;
+      background: rgba(34, 197, 94, 0.15);
+      border: 2px solid #22c55e;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 18px;
+      box-shadow: 0 0 24px rgba(34, 197, 94, 0.4);
+    }
+
+    .success-icon-wrap svg {
+      width: 42px;
+      height: 42px;
+      color: #22c55e;
+    }
+
+    .success-title {
+      font-size: 20px;
+      font-weight: 800;
+      color: #ffffff;
+      margin-bottom: 6px;
+    }
+
+    .success-subtitle {
+      font-size: 14px;
+      color: #94a3b8;
+      margin-bottom: 22px;
+      line-height: 1.5;
+    }
+
+    .success-info-box {
+      background: rgba(34, 197, 94, 0.08);
+      border: 1px solid rgba(34, 197, 94, 0.25);
+      border-radius: 12px;
+      padding: 18px 16px;
+      text-align: left;
+      margin-bottom: 22px;
+    }
+
+    .success-info-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 13px;
+      margin-bottom: 8px;
+    }
+
+    .success-info-row:last-child {
+      margin-bottom: 0;
+      padding-top: 8px;
+      border-top: 1px dashed rgba(255, 255, 255, 0.1);
+    }
+
+    .success-info-label {
+      color: #94a3b8;
+    }
+
+    .success-info-val {
+      font-weight: 700;
+      color: #fff;
+    }
+
+    .success-info-val.highlight {
+      color: #4ade80;
+    }
+
+    .app-return-box {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 12px;
+      padding: 16px;
+      font-size: 14px;
+      line-height: 1.5;
+      color: #e2e8f0;
+      margin-bottom: 20px;
+      text-align: left;
+    }
+
+    .app-return-box strong {
+      color: #38bdf8;
+    }
+
+    .btn-return-app {
+      width: 100%;
+      height: 50px;
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: #fff;
+      border-radius: 12px;
+      font-size: 15px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      cursor: pointer;
+      text-decoration: none;
+    }
+
+    .btn-return-app:hover {
+      background: rgba(255, 255, 255, 0.16);
+    }
+
+    /* Toast Notification */
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%) translateY(100px);
+      background: #1e293b;
+      border: 1px solid #334155;
+      color: #fff;
+      padding: 12px 20px;
+      border-radius: 999px;
+      font-size: 13px;
+      font-weight: 600;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.6);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      z-index: 100;
+      pointer-events: none;
+    }
+
+    .toast.show {
+      transform: translateX(-50%) translateY(0);
+    }
+
+    /* Footer */
+    .checkout-footer {
+      text-align: center;
+      font-size: 11px;
+      color: #64748b;
+      margin-top: 24px;
+      line-height: 1.5;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="container">
+
+    <!-- Top Brand Header -->
+    <header class="brand-header">
+      <img src="/drawable/app_logo_wordmark.png" onerror="this.onerror=null; this.src='drawable/app_logo_wordmark.png'; this.style.display='inline-block'" alt="Cine Ultimate" class="brand-logo" />
+      <div id="fallbackTitle" class="brand-title" style="display:none;">Cine Ultimate</div>
+      <div>
+        <span class="security-badge">
+          <svg width="12" height="12" fill="currentColor" viewBox="0 0 24 24"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm-2 16l-4-4 1.41-1.41L10 14.17l6.59-6.59L18 9l-8 8z"/></svg>
+          Checkout Oficial • Liberação Instantânea
+        </span>
+      </div>
+    </header>
+
+    <!-- Main Checkout Card -->
+    <main class="card">
+
+      <!-- Plan Summary -->
+      <section class="plan-summary">
+        <div class="plan-info">
+          <h2>Plano Acesso Completo</h2>
+          <p>Filmes, Séries, Canais 4K & Sala 3D</p>
+        </div>
+        <div class="plan-price">
+          <div class="val" id="planPriceVal">R$ 29,00</div>
+          <div class="tag">Pagamento Único</div>
+        </div>
+      </section>
+
+      <!-- Key Features -->
+      <div class="features-list">
+        <div class="feature-item">
+          <svg fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg>
+          Sem mensalidades
+        </div>
+        <div class="feature-item">
+          <svg fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg>
+          Canais 4K & Full HD
+        </div>
+        <div class="feature-item">
+          <svg fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg>
+          Sala Cinema 3D
+        </div>
+        <div class="feature-item">
+          <svg fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg>
+          Liberação Automática
+        </div>
+      </div>
+
+      <!-- Error Alert -->
+      <div id="errorAlert" class="alert-error">
+        <svg width="18" height="18" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path></svg>
+        <span id="errorMessage">Ocorreu um erro ao processar.</span>
+      </div>
+
+      <!-- ─── ETAPA 1: FORMULÁRIO DE DADOS OBRIGATÓRIOS ─── -->
+      <form id="checkoutForm" onsubmit="handleCreatePix(event)">
+        
+        <!-- Alerta de Segurança e Validação de Gmail -->
+        <div class="alert-important">
+          <div class="alert-important-icon">⚠️</div>
+          <div class="alert-important-body">
+            <strong>AVISO OBRIGATÓRIO (GMAIL DE ACESSO):</strong>
+            <p>O <strong>mesmo Gmail</strong> informado neste pagamento será a sua chave de acesso exclusiva no aplicativo Cine Ultimate. Após o pagamento PIX de <span id="planPriceAlert">R$ 29,00</span>, a criação de conta só será liberada para este Gmail exato.</p>
+          </div>
+        </div>
+
+        <!-- Campo 1: Nome -->
+        <div class="form-group">
+          <label class="form-label" for="clientName">Nome Completo <span class="req">*</span></label>
+          <input type="text" id="clientName" class="form-control" placeholder="Ex: Carlos Oliveira" required autocomplete="name" />
+        </div>
+
+        <!-- Campo 2: Gmail (Chave de Acesso no App) -->
+        <div class="form-group">
+          <label class="form-label" for="clientEmail">Seu Gmail de Acesso ao App <span class="req">*</span></label>
+          <input type="email" id="clientEmail" class="form-control" placeholder="seu-email@gmail.com" required autocomplete="email" />
+          <div class="form-hint" style="color: #fde047; font-weight: 600;">⚠️ Atenção: Certifique-se de digitar o Gmail que você usará no Cine Ultimate.</div>
+        </div>
+
+        <!-- Campo 3: Telefone / WhatsApp -->
+        <div class="form-group">
+          <label class="form-label" for="clientPhone">Celular / WhatsApp <span class="req">*</span></label>
+          <input type="tel" id="clientPhone" class="form-control" placeholder="(11) 99999-9999" required autocomplete="tel" oninput="formatPhone(this)" />
+          <div class="form-hint">Para envio de comprovante e suporte técnico imediato.</div>
+        </div>
+
+        <!-- Botão CTA -->
+        <button type="submit" id="btnSubmit" class="btn-submit">
+          <svg width="18" height="18" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 14.5v-3h3l-4-5-4 5h3v3h2z"/></svg>
+          <span id="planPayButtonLabel">Pagar R$ 29,00 via PIX</span>
+        </button>
+      </form>
+
+      <!-- ─── ETAPA 2: QR CODE E CÓDIGO PIX ─── -->
+      <div id="pixView" class="pix-view">
+        <h3 class="pix-title">Pague com o PIX Copia e Cola</h3>
+        <p class="pix-subtitle">Abra o app do seu banco e selecione a opção <strong>PIX Copia e Cola</strong>:</p>
+
+        <div style="background: rgba(34, 197, 94, 0.1); border: 1px solid rgba(34, 197, 94, 0.3); border-radius: 10px; padding: 10px 14px; margin-bottom: 14px; font-size: 12px; color: #4ade80;">
+          Liberando acesso para: <strong id="pixActiveEmail" style="color:#fff;"></strong>
+        </div>
+
+        <!-- QR Code -->
+        <div class="qr-container">
+          <img id="qrCodeImage" src="" alt="QR Code PIX R$ 29,00" />
+        </div>
+
+        <!-- Botão Copiar Código -->
+        <button type="button" class="btn-copy" onclick="copyPixCode()">
+          <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"></path></svg>
+          <span id="btnCopyText">Copiar Código PIX</span>
+        </button>
+
+        <div id="pixCodeText" class="pix-code-preview"></div>
+
+        <!-- Radar de Verificação Automática -->
+        <div class="status-pulse">
+          <div class="pulse-dot"></div>
+          <span id="pixStatusLabel">Verificando seu pagamento automaticamente...</span>
+        </div>
+
+        <button type="button" id="btnManualCheckPix" class="btn-submit" style="margin-top: 14px;" onclick="forceCheckPixStatusNow()">
+          <span>✓ Já fiz o pagamento — Confirmar Agora</span>
+        </button>
+      </div>
+
+      <!-- ─── ETAPA 3: SUCESSO / LIBERAÇÃO CONFIRMADA ─── -->
+      <div id="successView" class="success-view">
+        <div class="success-icon-wrap">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
+        </div>
+
+        <h3 class="success-title">Pagamento Confirmado!</h3>
+        <p class="success-subtitle">O seu pagamento de <span id="planPriceSuccess">R$ 29,00</span> foi aprovado pelo Mercado Pago.</p>
+
+        <div class="success-info-box">
+          <div class="success-info-row">
+            <span class="success-info-label">Gmail Liberado:</span>
+            <span id="successEmail" class="success-info-val highlight"></span>
+          </div>
+          <div class="success-info-row">
+            <span class="success-info-label">Plano:</span>
+            <span class="success-info-val">Cine Ultimate Vitalício</span>
+          </div>
+          <div class="success-info-row">
+            <span class="success-info-label">Status no Sistema:</span>
+            <span class="success-info-val highlight">✓ Acesso Ativado</span>
+          </div>
+        </div>
+
+        <div class="app-return-box" style="border-color: rgba(34, 197, 94, 0.35); background: rgba(34, 197, 94, 0.08);">
+          🚀 <strong>Redirecionamento Automático para o App:</strong><br />
+          Você será redirecionado para o aplicativo <strong>Cine Ultimate</strong> em instantes para criar sua senha com este mesmo Gmail.<br /><br />
+          Se o aplicativo não abrir automaticamente em alguns segundos, clique no botão abaixo:
+        </div>
+
+        <a id="btnOpenApp" href="#" class="btn-submit" style="text-decoration:none; margin-top: 10px;">
+          <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14h2v2h-2v-2zm0-10h2v8h-2V6z"/></svg>
+          <span>Abrir Cine Ultimate e Criar Senha</span>
+        </a>
+      </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="checkout-footer">
+      Ambiente Criptografado &middot; Mercado Pago Instituição de Pagamento &middot; Supabase Database
+    </footer>
+
+  </div>
+
+  <!-- Toast Notification -->
+  <div id="toast" class="toast">
+    <svg width="16" height="16" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg>
+    <span id="toastMsg">Código PIX copiado!</span>
+  </div>
+
+  <script>
+    const urlParams = new URLSearchParams(window.location.search);
+    const checkoutSessionId = (urlParams.get('session') || '').trim();
+    const prefilledEmail = (urlParams.get('email') || '').trim().toLowerCase();
+    if (prefilledEmail) {
+      const emailInput = document.getElementById('clientEmail');
+      if (emailInput) emailInput.value = prefilledEmail;
+    }
+
+    let activePaymentId = null;
+    let activeEmail = '';
+    let pollingInterval = null;
+    let currentRawPixCode = '';
+    const PIX_STATE_STORAGE_KEY = 'cine_active_pix_checkout_v1';
+
+    function formatBrl(amount) {
+      const n = Number(amount);
+      if (!Number.isFinite(n) || n <= 0) return 'R$ 29,00';
+      return 'R$ ' + n.toFixed(2).replace('.', ',');
+    }
+
+    function applyPlanPrice(formattedPrice) {
+      if (!formattedPrice) return;
+      ['planPriceVal', 'planPriceAlert', 'planPriceSuccess'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.innerText = formattedPrice;
+      });
+      const btnLabel = document.getElementById('planPayButtonLabel');
+      if (btnLabel) btnLabel.innerText = `Pagar ${formattedPrice} via PIX`;
+      const qrImg = document.getElementById('qrCodeImage');
+      if (qrImg) qrImg.alt = `QR Code PIX ${formattedPrice}`;
+    }
+
+    async function syncLivePlanPrice() {
+      try {
+        const res = await fetch('/api/health', { cache: 'no-store' });
+        if (!res.ok) return;
+        const data = await res.json();
+        const amount = data?.plan?.amount;
+        if (amount !== undefined && amount !== null) {
+          applyPlanPrice(data?.plan?.formattedAmount || formatBrl(amount));
+        }
+      } catch (e) { }
+    }
+
+    function savePendingPixToSession(payment) {
+      try {
+        sessionStorage.setItem(PIX_STATE_STORAGE_KEY, JSON.stringify({
+          sessionId: checkoutSessionId,
+          paymentId: payment.paymentId,
+          email: payment.email,
+          qrCode: payment.qrCode,
+          qrCodeBase64: payment.qrCodeBase64 || '',
+          savedAt: Date.now()
+        }));
+      } catch (e) { }
+    }
+
+    function clearPendingPixFromSession() {
+      try { sessionStorage.removeItem(PIX_STATE_STORAGE_KEY); } catch (e) { }
+    }
+
+    function restorePendingPixFromSession() {
+      try {
+        const raw = sessionStorage.getItem(PIX_STATE_STORAGE_KEY);
+        if (!raw) return;
+        const saved = JSON.parse(raw);
+        if (!saved || !saved.paymentId || !saved.email || !saved.qrCode) return;
+        if (saved.sessionId && checkoutSessionId && saved.sessionId !== checkoutSessionId) return;
+        if (Date.now() - Number(saved.savedAt || 0) > 25 * 60 * 1000) {
+          clearPendingPixFromSession();
+          return;
+        }
+        activePaymentId = saved.paymentId;
+        activeEmail = saved.email;
+        currentRawPixCode = saved.qrCode;
+        showPixView(saved.email, saved.qrCode, saved.qrCodeBase64 || '');
+        startStatusPolling();
+      } catch (e) { }
+    }
+
+    function showPixView(email, qrCode, qrCodeBase64) {
+      const pixEmailEl = document.getElementById('pixActiveEmail');
+      if (pixEmailEl) pixEmailEl.innerText = email;
+      document.getElementById('pixCodeText').innerText = qrCode;
+      const qrImg = document.getElementById('qrCodeImage');
+      if (qrCodeBase64) {
+        qrImg.src = `data:image/png;base64,${qrCodeBase64}`;
+      } else {
+        qrImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=240x240&data=${encodeURIComponent(qrCode)}`;
+      }
+      document.getElementById('checkoutForm').style.display = 'none';
+      document.getElementById('pixView').style.display = 'block';
+    }
+
+    syncLivePlanPrice();
+    restorePendingPixFromSession();
+
+    // Auto-formatação de telefone (XX) XXXXX-XXXX
+    function formatPhone(input) {
+      let v = input.value.replace(/\D/g, '');
+      if (v.length > 11) v = v.slice(0, 11);
+      if (v.length > 6) {
+        input.value = `(${v.slice(0, 2)}) ${v.slice(2, 7)}-${v.slice(7)}`;
+      } else if (v.length > 2) {
+        input.value = `(${v.slice(0, 2)}) ${v.slice(2)}`;
+      } else if (v.length > 0) {
+        input.value = `(${v}`;
+      } else {
+        input.value = '';
+      }
+    }
+
+    function showToast(msg) {
+      const toast = document.getElementById('toast');
+      document.getElementById('toastMsg').innerText = msg;
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), 2800);
+    }
+
+    function showError(msg) {
+      const el = document.getElementById('errorAlert');
+      const text = document.getElementById('errorMessage');
+      text.innerText = msg;
+      el.style.display = 'flex';
+      setTimeout(() => {
+        el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }, 50);
+    }
+
+    function hideError() {
+      document.getElementById('errorAlert').style.display = 'none';
+    }
+
+    // ─── 1. CRIAÇÃO DO PIX ───
+    async function handleCreatePix(e) {
+      e.preventDefault();
+      hideError();
+
+      const name = document.getElementById('clientName').value.trim();
+      const email = document.getElementById('clientEmail').value.trim().toLowerCase();
+      const phone = document.getElementById('clientPhone').value.trim();
+      const btn = document.getElementById('btnSubmit');
+
+      if (!name || name.length < 2) {
+        showError('Por favor, informe seu nome completo.');
+        return;
+      }
+      if (!email || !email.includes('@') || !email.includes('.')) {
+        showError('Por favor, informe um Gmail válido.');
+        return;
+      }
+      const digits = phone.replace(/\D/g, '');
+      if (digits.length < 10) {
+        showError('Por favor, informe um número de celular/WhatsApp válido com DDD.');
+        return;
+      }
+
+      btn.disabled = true;
+      btn.innerHTML = `<span style="display:inline-block; animation:spin 1s linear infinite;">⏳</span> Gerando PIX Seguro...`;
+
+      try {
+        const res = await fetch('/api/pix/create', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name, email, phone, sessionId: checkoutSessionId })
+        });
+
+        const data = await res.json();
+
+        if (!res.ok || !data.ok) {
+          throw new Error(data.error || 'Não foi possível gerar a chave PIX no momento.');
+        }
+
+        activePaymentId = data.payment.paymentId || data.payment.mpPaymentId;
+        activeEmail = email;
+        currentRawPixCode = data.payment.qrCode;
+
+        savePendingPixToSession({
+          paymentId: activePaymentId,
+          email: activeEmail,
+          qrCode: currentRawPixCode,
+          qrCodeBase64: data.payment.qrCodeBase64 || ''
+        });
+        showPixView(activeEmail, currentRawPixCode, data.payment.qrCodeBase64 || '');
+
+        // Inicia polling rápido de verificação
+        startStatusPolling();
+      } catch (err) {
+        console.error(err);
+        showError(err.message || 'Falha na comunicação com o servidor.');
+        btn.disabled = false;
+        btn.innerHTML = `<svg width="18" height="18" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 14.5v-3h3l-4-5-4 5h3v3h2z"/></svg> <span>Tentar Novamente</span>`;
+      }
+    }
+
+    // ─── 2. COPIAR CÓDIGO PIX ───
+    async function copyPixCode() {
+      if (!currentRawPixCode) return;
+      try {
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          await navigator.clipboard.writeText(currentRawPixCode);
+        } else {
+          const ta = document.createElement('textarea');
+          ta.value = currentRawPixCode;
+          document.body.appendChild(ta);
+          ta.select();
+          document.execCommand('copy');
+          document.body.removeChild(ta);
+        }
+        showToast('Código PIX copiado com sucesso!');
+        const btnText = document.getElementById('btnCopyText');
+        const oldText = btnText.innerText;
+        btnText.innerText = '✓ Copiado!';
+        setTimeout(() => { btnText.innerText = oldText; }, 2500);
+      } catch (e) {
+        showToast('Selecione e copie o código abaixo.');
+      }
+    }
+
+    // ─── 3. POLLING DO STATUS (MERCADO PAGO + SUPABASE) ───
+    let isCheckingPix = false;
+    let resumePollBound = false;
+
+    async function checkPixStatusOnce() {
+      if (isCheckingPix || !activePaymentId || !activeEmail) return false;
+      isCheckingPix = true;
+      try {
+        const res = await fetch(`/api/pix/status?paymentId=${encodeURIComponent(activePaymentId)}&email=${encodeURIComponent(activeEmail)}`, {
+          cache: 'no-store'
+        });
+        if (!res.ok) return false;
+
+        const data = await res.json();
+        if (data && (data.status === 'approved' || data.approved === true)) {
+          stopStatusPolling();
+          renderSuccessView();
+          return true;
+        }
+        return false;
+      } catch (e) {
+        return false;
+      } finally {
+        isCheckingPix = false;
+      }
+    }
+
+    async function forceCheckPixStatusNow() {
+      const btn = document.getElementById('btnManualCheckPix');
+      const statusLabel = document.getElementById('pixStatusLabel');
+      if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = '<span>⏳ Consultando Mercado Pago...</span>';
+      }
+      isCheckingPix = false;
+      const approved = await checkPixStatusOnce();
+      if (!approved) {
+        if (statusLabel) {
+          statusLabel.innerText = 'Pagamento ainda em processamento no banco... continuando verificação.';
+        }
+        if (btn) {
+          btn.disabled = false;
+          btn.innerHTML = '<span>✓ Já fiz o pagamento — Confirmar Agora</span>';
+        }
+        showToast('Aguarde alguns segundos e clique novamente se acabou de pagar.');
+      }
+    }
+
+    function handleVisibilityOrFocusResume() {
+      if (document.visibilityState === 'hidden') return;
+      if (activePaymentId && activeEmail) {
+        checkPixStatusOnce();
+      }
+    }
+
+    function stopStatusPolling() {
+      if (pollingInterval) {
+        clearInterval(pollingInterval);
+        pollingInterval = null;
+      }
+      if (resumePollBound) {
+        document.removeEventListener('visibilitychange', handleVisibilityOrFocusResume);
+        document.removeEventListener('resume', handleVisibilityOrFocusResume);
+        window.removeEventListener('focus', handleVisibilityOrFocusResume);
+        window.removeEventListener('pageshow', handleVisibilityOrFocusResume);
+        resumePollBound = false;
+      }
+    }
+
+    function startStatusPolling() {
+      stopStatusPolling();
+
+      if (!resumePollBound) {
+        document.addEventListener('visibilitychange', handleVisibilityOrFocusResume);
+        document.addEventListener('resume', handleVisibilityOrFocusResume);
+        window.addEventListener('focus', handleVisibilityOrFocusResume);
+        window.addEventListener('pageshow', handleVisibilityOrFocusResume);
+        resumePollBound = true;
+      }
+
+      pollingInterval = setInterval(checkPixStatusOnce, 650);
+      setTimeout(checkPixStatusOnce, 450);
+    }
+
+    // ─── 4. TELA DE SUCESSO E LIBERAÇÃO ───
+    function renderSuccessView() {
+      clearPendingPixFromSession();
+      document.getElementById('pixView').style.display = 'none';
+      document.getElementById('successEmail').innerText = activeEmail;
+
+      const payQuery = `email=${encodeURIComponent(activeEmail)}${activePaymentId ? `&paymentId=${encodeURIComponent(activePaymentId)}` : ''}`;
+      const deepLink = `nuvio://paid?${payQuery}`;
+      const deepLinkAlt = `cineultimate://paid?${payQuery}`;
+
+      const btn = document.getElementById('btnOpenApp');
+      if (btn) {
+        btn.href = deepLink;
+        btn.onclick = function(e) {
+          window.location.href = deepLink;
+          setTimeout(function() {
+            try { window.location.href = deepLinkAlt; } catch(err) {}
+          }, 500);
+        };
+      }
+
+      document.getElementById('successView').style.display = 'block';
+      showToast('🎉 Pagamento aprovado! Abrindo o app...');
+
+      // Redirecionamento imediato para o app Cine Ultimate
+      setTimeout(function() {
+        window.location.href = deepLink;
+        setTimeout(function() {
+          try { window.location.href = deepLinkAlt; } catch(err) {}
+        }, 450);
+      }, 20);
+    }
+  </script>
+
+</body>
+</html>

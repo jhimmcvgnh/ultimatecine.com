@@ -1,0 +1,13 @@
+{
+  "name": "cine-ultimate-backend",
+  "version": "1.0.0",
+  "description": "Cine Ultimate Mercado Pago PIX + Supabase Serverless Backend",
+  "main": "api/index.js",
+  "scripts": {
+    "start": "node api/index.js"
+  },
+  "keywords": ["mercadopago", "pix", "supabase", "vercel"],
+  "author": "Cine Ultimate",
+  "license": "ISC"
+}
+
