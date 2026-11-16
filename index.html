@@ -5,25 +5,40 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>Cine Ultimate — Checkout Oficial de Acesso</title>
-  <meta name="description" content="Libere seu acesso completo ao Cine Ultimate com pagamento único via PIX de R$ 29,00." />
+  <meta name="description" content="Escolha seu plano e libere seu acesso completo ao Cine Ultimate com pagamento único via PIX de R$ 29,00." />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
 
   <style>
     :root {
-      --bg: #090b10;
-      --card-bg: #121620;
-      --card-border: rgba(255, 255, 255, 0.08);
-      --accent: #22c55e;
-      --accent-glow: rgba(34, 197, 94, 0.25);
-      --accent-hover: #16a34a;
-      --danger: #ef4444;
+      /* Tela 1: Preto puro + azul escuro sutil */
+      --plans-bg: #050507;
+      --plans-card: #0b0d13;
+      --plans-card-inner: linear-gradient(180deg, #0d1017 0%, #07090d 100%);
+      --plans-border: rgba(148, 163, 184, 0.14);
+      --blue-deep: #172554;
+      --blue-mid: #1d4ed8;
+      --blue-bright: #2563eb;
+      --blue-soft: #60a5fa;
+      --blue-glow: rgba(29, 78, 216, 0.36);
+
+      /* Tela 2: Checkout Navy / Indigo (Segunda Imagem) */
+      --checkout-bg: #040615;
+      --navy-panel: rgba(13, 18, 46, 0.88);
+      --navy-panel-border: rgba(99, 122, 220, 0.24);
+      --navy-row: rgba(20, 27, 65, 0.86);
+      --navy-row-border: rgba(110, 134, 240, 0.16);
+      --navy-input: #070a1e;
+      --navy-input-border: rgba(99, 122, 220, 0.28);
+      --navy-cta: #1f3dff;
+      --navy-cta-hover: #2f4cff;
+
+      /* Comuns */
       --text-main: #f8fafc;
       --text-muted: #94a3b8;
-      --input-bg: #1a202c;
-      --input-border: rgba(255, 255, 255, 0.12);
-      --radius: 16px;
+      --success: #22c55e;
+      --danger: #ef4444;
     }
 
     * {
@@ -31,173 +46,770 @@
       margin: 0;
       padding: 0;
       -webkit-tap-highlight-color: transparent;
-      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      font-family: 'Inter', 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     }
 
     body {
-      background-color: var(--bg);
+      background-color: var(--plans-bg);
       color: var(--text-main);
-      min-height: 100vh;
+      min-height: 100dvh;
+      overflow-x: hidden;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: flex-start;
       padding: 24px 16px 40px;
-      background-image: 
-        radial-gradient(circle at 50% 0%, rgba(34, 197, 94, 0.12) 0%, transparent 60%),
-        radial-gradient(circle at 10% 100%, rgba(220, 38, 38, 0.08) 0%, transparent 50%);
+      position: relative;
+      transition: background-color 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    /* Fundos dinâmicos por tela */
+    body.theme-plans {
+      background-color: #050507;
+      background-image:
+        radial-gradient(ellipse 68% 45% at 50% 34%, rgba(23, 37, 84, 0.34) 0%, rgba(15, 23, 42, 0.14) 48%, transparent 78%),
+        radial-gradient(circle at 50% 0%, rgba(30, 58, 138, 0.14) 0%, transparent 55%);
       background-attachment: fixed;
     }
 
-    .container {
-      width: 100%;
-      max-width: 440px;
-      margin: 0 auto;
+    body.theme-checkout {
+      background-color: #040615;
+      background-image:
+        radial-gradient(circle at 16% 12%, rgba(29, 78, 216, 0.26) 0%, transparent 54%),
+        radial-gradient(circle at 86% 88%, rgba(49, 46, 129, 0.34) 0%, transparent 56%),
+        linear-gradient(165deg, #040615 0%, #070b24 55%, #0c1033 100%);
+      background-attachment: fixed;
     }
 
-    /* Top Brand */
+    .screen {
+      width: 100%;
+      display: none;
+      animation: screenReveal 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    .screen.active {
+      display: block;
+    }
+
+    @keyframes screenReveal {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* ============================================================
+       TELA 1: PRICING PLAN TILT (Preto + Azul Escuro Sutil)
+       ============================================================ */
+    .plans-shell {
+      width: 100%;
+      max-width: 760px;
+      margin: 0 auto;
+      padding-top: 8px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
     .brand-header {
       text-align: center;
       margin-bottom: 24px;
     }
 
     .brand-logo {
-      height: 48px;
+      height: 44px;
       max-width: 220px;
       object-fit: contain;
-      filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.6));
+      filter: drop-shadow(0 6px 18px rgba(0, 0, 0, 0.75));
     }
 
     .brand-title {
       font-size: 24px;
       font-weight: 800;
-      letter-spacing: -0.5px;
-      background: linear-gradient(135deg, #ffffff 40%, #a7f3d0 100%);
+      letter-spacing: -0.03em;
+      background: linear-gradient(135deg, #ffffff 35%, #93c5fd 100%);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
     }
 
-    .security-badge {
+    .plans-hero {
+      text-align: center;
+      max-width: 460px;
+      margin-bottom: 28px;
+    }
+
+    .plans-hero h1 {
+      font-size: clamp(26px, 5vw, 32px);
+      font-weight: 700;
+      letter-spacing: -0.035em;
+      color: #f8fafc;
+      line-height: 1.15;
+    }
+
+    .plans-hero p {
+      margin-top: 8px;
+      font-size: 14px;
+      color: #94a3b8;
+      line-height: 1.5;
+    }
+
+    /* Segmented Pill Toggle bar (estilo imagem 1) */
+    .billing-bar {
+      margin-top: 20px;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .billing-radiogroup {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      padding: 4px;
+      border-radius: 999px;
+      background: #0c0e14;
+      border: 1px solid rgba(148, 163, 184, 0.16);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03);
+    }
+
+    .billing-pill-btn {
+      position: relative;
+      min-height: 38px;
+      padding: 0 20px;
+      border-radius: 999px;
+      border: none;
+      background: transparent;
+      color: #f8fafc;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
       display: inline-flex;
       align-items: center;
       gap: 6px;
-      background: rgba(34, 197, 94, 0.1);
-      border: 1px solid rgba(34, 197, 94, 0.25);
-      color: #4ade80;
+      z-index: 1;
+      outline: none;
+    }
+
+    .billing-pill-bg {
+      position: absolute;
+      inset: 0;
+      border-radius: 999px;
+      background: linear-gradient(125deg, #172554 0%, #1d4ed8 65%, #2563eb 100%);
+      box-shadow: 0 4px 16px rgba(29, 78, 216, 0.42), inset 0 1px 0 rgba(191, 219, 254, 0.25);
+      z-index: -1;
+    }
+
+    .billing-save-badge {
       padding: 6px 12px;
       border-radius: 999px;
       font-size: 12px;
       font-weight: 600;
-      margin-top: 8px;
+      color: #93c5fd;
+      background: linear-gradient(135deg, rgba(23, 37, 84, 0.85), rgba(30, 58, 138, 0.55));
+      border: 1px solid rgba(59, 130, 246, 0.34);
+      letter-spacing: -0.01em;
     }
 
-    /* Main Card */
-    .card {
-      background: var(--card-bg);
-      border: 1px solid var(--card-border);
-      border-radius: var(--radius);
-      padding: 24px 20px;
-      box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.7);
-      backdrop-filter: blur(12px);
+    /* Card Central Único com Tilt 3D + Luz Azul Escuro Sutil */
+    .plan-grid-single {
+      width: 100%;
+      display: flex;
+      justify-content: center;
+      list-style: none;
+    }
+
+    .plan-tilt-wrap {
       position: relative;
-      overflow: hidden;
+      width: 100%;
+      max-width: 356px;
+      perspective: 900px;
+      list-style: none;
     }
 
-    .card::before {
-      content: '';
+    /* Aura azul escuro sutil por trás do card */
+    .plan-ambient-aura {
+      position: absolute;
+      inset: -14px;
+      z-index: 0;
+      border-radius: 28px;
+      background: radial-gradient(circle at 50% 48%, rgba(29, 78, 216, 0.32), rgba(23, 37, 84, 0.14) 55%, transparent 76%);
+      filter: blur(28px);
+      pointer-events: none;
+      animation: auraBreathe 3.2s ease-in-out infinite;
+    }
+
+    @keyframes auraBreathe {
+      0%, 100% {
+        opacity: 0.48;
+        transform: scale(0.98);
+      }
+      50% {
+        opacity: 0.82;
+        transform: scale(1.03);
+      }
+    }
+
+    .plan-card {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      flex-direction: column;
+      border-radius: 18px;
+      padding: 24px 20px 20px;
+      background: #0a0c11;
+      color: #f8fafc;
+      overflow: hidden;
+      transform-style: preserve-3d;
+      will-change: transform;
+      transition: transform 0.22s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.25s ease;
+      box-shadow:
+        0 26px 60px -18px rgba(0, 0, 0, 0.92),
+        0 0 0 1px rgba(30, 58, 138, 0.28);
+    }
+
+    /* Camada do feixe animado na borda (azul escuro sutil) */
+    .plan-border-runner {
+      position: absolute;
+      inset: 0;
+      border-radius: 18px;
+      overflow: hidden;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .plan-border-beam {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      width: 240%;
+      aspect-ratio: 1 / 1;
+      transform: translate(-50%, -50%) rotate(0deg);
+      background: conic-gradient(
+        from 0deg,
+        transparent 0deg 205deg,
+        rgba(23, 37, 84, 0.45) 242deg,
+        rgba(37, 99, 235, 0.88) 286deg,
+        rgba(147, 197, 253, 0.55) 312deg,
+        rgba(30, 58, 138, 0.25) 340deg,
+        transparent 360deg
+      );
+      animation: spinBorderLight 6s linear infinite;
+      opacity: 0.92;
+    }
+
+    @keyframes spinBorderLight {
+      to {
+        transform: translate(-50%, -50%) rotate(360deg);
+      }
+    }
+
+    .plan-border-mask {
+      position: absolute;
+      inset: 1.5px;
+      border-radius: 16.5px;
+      background: linear-gradient(180deg, #0d1017 0%, #08090e 100%);
+      z-index: 0;
+    }
+
+    /* Brilho radial seguindo o cursor */
+    .plan-glare {
+      position: absolute;
+      inset: 0;
+      border-radius: 18px;
+      pointer-events: none;
+      mix-blend-mode: soft-light;
+      opacity: 0;
+      transition: opacity 0.25s ease;
+      z-index: 2;
+      background: radial-gradient(
+        200px circle at var(--mx, 50%) var(--my, 50%),
+        rgba(147, 197, 253, 0.26),
+        rgba(255, 255, 255, 0.08) 40%,
+        transparent 68%
+      );
+    }
+
+    .plan-tilt-wrap:hover .plan-glare {
+      opacity: 1;
+    }
+
+    /* Badge topo direito estilo "Popular" */
+    .plan-popular-badge {
       position: absolute;
       top: 0;
-      left: 0;
-      right: 0;
-      height: 3px;
-      background: linear-gradient(90deg, #22c55e, #10b981, #059669);
-    }
-
-    /* Plan Header */
-    .plan-summary {
-      background: rgba(255, 255, 255, 0.03);
-      border: 1px solid rgba(255, 255, 255, 0.06);
-      border-radius: 12px;
-      padding: 16px;
-      margin-bottom: 22px;
-      display: flex;
-      justify-content: space-between;
+      right: 16px;
+      z-index: 4;
+      display: inline-flex;
       align-items: center;
+      gap: 5px;
+      padding: 6px 11px;
+      border-bottom-left-radius: 9px;
+      border-bottom-right-radius: 9px;
+      font-size: 11px;
+      font-weight: 600;
+      color: #eff6ff;
+      background: linear-gradient(135deg, #172554 0%, #1d4ed8 60%, #2563eb 100%);
+      box-shadow: 0 8px 20px -4px rgba(29, 78, 216, 0.55);
+      animation: badgeFloat 2.6s ease-in-out infinite;
     }
 
-    .plan-info h2 {
-      font-size: 16px;
-      font-weight: 700;
-      color: #fff;
+    @keyframes badgeFloat {
+      0%, 100% {
+        transform: translateY(0) translateZ(38px);
+      }
+      50% {
+        transform: translateY(-2.5px) translateZ(38px);
+      }
     }
 
-    .plan-info p {
-      font-size: 12px;
-      color: var(--text-muted);
-      margin-top: 2px;
+    .plan-content {
+      position: relative;
+      z-index: 3;
+      transform: translateZ(20px);
     }
 
-    .plan-price {
-      text-align: right;
+    .plan-name {
+      font-size: 17px;
+      font-weight: 600;
+      letter-spacing: -0.02em;
+      color: #f8fafc;
+      padding-right: 92px;
     }
 
-    .plan-price .val {
-      font-size: 22px;
-      font-weight: 800;
-      color: #22c55e;
-      letter-spacing: -0.5px;
+    .plan-tagline {
+      margin-top: 4px;
+      font-size: 12.5px;
+      color: #94a3b8;
+      line-height: 1.4;
     }
 
-    .plan-price .tag {
-      font-size: 10px;
-      text-transform: uppercase;
-      font-weight: 700;
-      letter-spacing: 0.5px;
+    .plan-price-row {
+      margin-top: 20px;
+      display: flex;
+      align-items: baseline;
+      gap: 4px;
+      transform: translateZ(18px);
+    }
+
+    .plan-currency {
+      font-size: 18px;
+      font-weight: 600;
       color: #94a3b8;
     }
 
-    /* Feature bullets */
-    .features-list {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 8px;
-      margin-bottom: 22px;
-      padding-bottom: 16px;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    .plan-amount-digits {
+      display: inline-flex;
+      align-items: baseline;
+      font-size: 42px;
+      font-weight: 800;
+      line-height: 1;
+      letter-spacing: -0.04em;
+      color: #ffffff;
+      font-variant-numeric: tabular-nums;
     }
 
-    .feature-item {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      font-size: 12px;
+    .roll-slot {
+      position: relative;
+      display: inline-block;
+      height: 1.08em;
+      overflow: hidden;
+    }
+
+    .roll-char {
+      display: inline-block;
+      transition: transform 0.45s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.35s ease;
+    }
+
+    .roll-char.entering {
+      transform: translateY(90%);
+      opacity: 0;
+    }
+
+    .plan-cents {
+      font-size: 16px;
+      font-weight: 700;
       color: #cbd5e1;
+      margin-left: 1px;
+    }
+
+    .plan-period {
+      margin-left: 4px;
+      font-size: 12px;
+      color: #94a3b8;
       font-weight: 500;
     }
 
-    .feature-item svg {
-      width: 14px;
-      height: 14px;
-      color: #22c55e;
+    .plan-billing-note {
+      margin-top: 6px;
+      font-size: 11.5px;
+      color: #7c8aa5;
+    }
+
+    .plan-features {
+      position: relative;
+      z-index: 3;
+      margin-top: 20px;
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      font-size: 13.5px;
+      color: #e2e8f0;
+      transform: translateZ(12px);
+    }
+
+    .plan-features li {
+      display: flex;
+      align-items: flex-start;
+      gap: 9px;
+      line-height: 1.35;
+    }
+
+    .feature-check-icon {
+      margin-top: 1px;
+      width: 17px;
+      height: 17px;
+      border-radius: 999px;
+      flex-shrink: 0;
+      display: grid;
+      place-items: center;
+      color: #ffffff;
+      background: linear-gradient(135deg, #172554 0%, #1d4ed8 60%, #2563eb 100%);
+      box-shadow: 0 2px 8px rgba(29, 78, 216, 0.45);
+    }
+
+    .btn-pick-plan {
+      position: relative;
+      z-index: 3;
+      margin-top: 24px;
+      min-height: 46px;
+      width: 100%;
+      border: 1px solid rgba(96, 165, 250, 0.28);
+      border-radius: 12px;
+      background: linear-gradient(125deg, #172554 0%, #1d4ed8 52%, #2563eb 100%);
+      color: #ffffff;
+      font-size: 14px;
+      font-weight: 600;
+      letter-spacing: -0.01em;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      overflow: hidden;
+      transform: translateZ(26px);
+      box-shadow:
+        0 10px 26px -8px rgba(29, 78, 216, 0.58),
+        inset 0 1px 0 rgba(191, 219, 254, 0.22);
+      transition: transform 0.16s ease, box-shadow 0.2s ease, filter 0.2s ease;
+      outline: none;
+    }
+
+    .btn-pick-plan:hover {
+      transform: translateZ(26px) translateY(-1.5px);
+      filter: brightness(1.08);
+      box-shadow:
+        0 14px 32px -6px rgba(37, 99, 235, 0.68),
+        inset 0 1px 0 rgba(191, 219, 254, 0.3);
+    }
+
+    .btn-pick-plan:active {
+      transform: translateZ(26px) scale(0.97);
+    }
+
+    .btn-pick-plan:focus-visible {
+      outline: 2px solid #60a5fa;
+      outline-offset: 2px;
+    }
+
+    .plans-security-footnote {
+      margin-top: 22px;
+      font-size: 12px;
+      color: #64748b;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* ============================================================
+       TELA 2: CHECKOUT (Estilo Navy / Indigo da Segunda Imagem)
+       ============================================================ */
+    .checkout-container {
+      width: 100%;
+      max-width: 448px;
+      margin: 0 auto;
+    }
+
+    .checkout-topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+
+    .checkout-mini-logo {
+      height: 30px;
+      max-width: 170px;
+      object-fit: contain;
+    }
+
+    .btn-back-plans {
+      background: rgba(16, 22, 56, 0.85);
+      border: 1px solid rgba(99, 122, 220, 0.28);
+      color: #cbd5e1;
+      border-radius: 10px;
+      padding: 7px 12px;
+      font-size: 12.5px;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s ease;
+    }
+
+    .btn-back-plans:hover {
+      background: rgba(29, 78, 216, 0.25);
+      border-color: rgba(96, 165, 250, 0.45);
+      color: #ffffff;
+    }
+
+    .section-heading {
+      font-size: 18px;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      color: #ffffff;
+      margin-bottom: 10px;
+    }
+
+    .section-heading.spaced {
+      margin-top: 22px;
+    }
+
+    .navy-panel {
+      background: var(--navy-panel);
+      border: 1px solid var(--navy-panel-border);
+      border-radius: 14px;
+      padding: 12px;
+      box-shadow: 0 20px 44px -14px rgba(2, 4, 20, 0.82);
+      backdrop-filter: blur(12px);
+    }
+
+    .navy-panel.details-pad {
+      padding: 18px 16px;
+    }
+
+    /* Card interno de item selecionado (como "Your Cart" da imagem 2) */
+    .navy-item-row {
+      background: var(--navy-row);
+      border: 1px solid var(--navy-row-border);
+      border-radius: 10px;
+      padding: 12px 14px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .navy-item-thumb {
+      width: 44px;
+      height: 44px;
+      border-radius: 9px;
+      background: #10173b;
+      border: 1px solid rgba(110, 134, 240, 0.25);
+      display: grid;
+      place-items: center;
+      flex-shrink: 0;
+      overflow: hidden;
+    }
+
+    .navy-item-thumb img {
+      width: 34px;
+      height: 34px;
+      object-fit: contain;
+    }
+
+    .navy-item-info {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .navy-item-name {
+      font-size: 14px;
+      font-weight: 600;
+      color: #ffffff;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .navy-item-price {
+      margin-top: 2px;
+      font-size: 14px;
+      font-weight: 700;
+      color: #ffffff;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .navy-item-actions {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
       flex-shrink: 0;
     }
 
-    /* Form Fields */
-    .form-group {
+    .navy-qty-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      font-weight: 700;
+      color: #e2e8f0;
+    }
+
+    .navy-circle-dot {
+      width: 22px;
+      height: 22px;
+      border-radius: 999px;
+      background: rgba(99, 122, 220, 0.22);
+      border: 1px solid rgba(129, 148, 242, 0.3);
+      display: grid;
+      place-items: center;
+      font-size: 11px;
+      font-weight: 700;
+      color: #cbd5e1;
+    }
+
+    .navy-plan-tag {
+      padding: 4px 8px;
+      border-radius: 6px;
+      background: rgba(31, 61, 255, 0.22);
+      border: 1px solid rgba(96, 165, 250, 0.3);
+      font-size: 11px;
+      font-weight: 600;
+      color: #93c5fd;
+    }
+
+    /* Detalhes de preço estilo "Price Details" */
+    .price-breakdown {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      padding-bottom: 14px;
+      margin-bottom: 14px;
+      border-bottom: 1px solid rgba(99, 122, 220, 0.18);
+    }
+
+    .price-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 13.5px;
+      color: #cbd5e1;
+    }
+
+    .price-row .label {
+      color: #94a3b8;
+      font-weight: 500;
+    }
+
+    .price-row .val {
+      font-weight: 600;
+      color: #f8fafc;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .price-row.total-row {
+      padding-top: 14px;
+      margin-top: 6px;
+      border-top: 1px solid rgba(99, 122, 220, 0.18);
+      font-size: 15px;
+    }
+
+    .price-row.total-row .label {
+      color: #f8fafc;
+      font-weight: 700;
+    }
+
+    .price-row.total-row .val {
+      font-size: 18px;
+      font-weight: 800;
+      color: #ffffff;
+    }
+
+    /* Aviso importante de Gmail dentro do painel azul marinho */
+    .alert-important {
+      background: rgba(234, 179, 8, 0.09);
+      border: 1px solid rgba(250, 204, 21, 0.36);
+      border-radius: 10px;
+      padding: 12px;
       margin-bottom: 16px;
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+      text-align: left;
+    }
+
+    .alert-important-icon {
+      font-size: 19px;
+      line-height: 1;
+      flex-shrink: 0;
+    }
+
+    .alert-important-body strong {
+      display: block;
+      color: #fde047;
+      font-size: 12px;
+      font-weight: 700;
+      margin-bottom: 3px;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+    }
+
+    .alert-important-body p {
+      font-size: 11.5px;
+      color: #fef08a;
+      line-height: 1.45;
+      margin: 0;
+    }
+
+    /* Erro */
+    .alert-error {
+      background: rgba(239, 68, 68, 0.13);
+      border: 1px solid rgba(239, 68, 68, 0.36);
+      color: #fca5a5;
+      padding: 11px 12px;
+      border-radius: 10px;
+      font-size: 13px;
+      font-weight: 500;
+      margin-bottom: 14px;
+      display: none;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* Campos do Formulário no estilo escuro embutido da imagem 2 */
+    .form-group {
+      margin-bottom: 14px;
       text-align: left;
     }
 
     .form-label {
       display: block;
-      font-size: 13px;
+      font-size: 12.5px;
       font-weight: 600;
-      color: #e2e8f0;
+      color: #dbeafe;
       margin-bottom: 6px;
     }
 
     .form-label span.req {
-      color: var(--accent);
+      color: #60a5fa;
     }
 
     .form-hint {
@@ -209,51 +821,53 @@
 
     .form-control {
       width: 100%;
-      height: 48px;
-      background: var(--input-bg);
-      border: 1px solid var(--input-border);
-      border-radius: 10px;
-      padding: 0 14px;
-      color: #fff;
-      font-size: 15px;
+      height: 46px;
+      background: var(--navy-input);
+      border: 1px solid var(--navy-input-border);
+      border-radius: 9px;
+      padding: 0 13px;
+      color: #ffffff;
+      font-size: 16px;
       font-weight: 500;
-      transition: all 0.2s ease;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
       outline: none;
     }
 
     .form-control:focus {
-      border-color: var(--accent);
-      box-shadow: 0 0 0 3px var(--accent-glow);
+      border-color: #3b82f6;
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.28);
     }
 
     .form-control::placeholder {
-      color: #64748b;
+      color: #64749b;
+      font-size: 14px;
     }
 
-    /* Buttons */
+    /* Botão principal azul elétrico (estilo "Apply" da imagem 2) */
     .btn-submit {
       width: 100%;
-      height: 52px;
-      background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+      height: 50px;
+      background: linear-gradient(135deg, #2546ff 0%, #1d4ed8 100%);
       color: #ffffff;
-      border: none;
-      border-radius: 12px;
-      font-size: 16px;
+      border: 1px solid rgba(147, 197, 253, 0.22);
+      border-radius: 10px;
+      font-size: 15px;
       font-weight: 700;
-      letter-spacing: -0.2px;
+      letter-spacing: -0.01em;
       cursor: pointer;
       display: flex;
       align-items: center;
       justify-content: center;
       gap: 8px;
-      box-shadow: 0 8px 24px -6px var(--accent-glow);
+      box-shadow: 0 10px 24px -6px rgba(31, 61, 255, 0.55);
       transition: all 0.2s ease;
-      margin-top: 20px;
+      margin-top: 16px;
     }
 
     .btn-submit:hover:not(:disabled) {
       transform: translateY(-1px);
-      box-shadow: 0 12px 28px -6px rgba(34, 197, 94, 0.4);
+      background: linear-gradient(135deg, #3454ff 0%, #2563eb 100%);
+      box-shadow: 0 14px 28px -6px rgba(37, 99, 235, 0.65);
     }
 
     .btn-submit:active:not(:disabled) {
@@ -261,62 +875,11 @@
     }
 
     .btn-submit:disabled {
-      opacity: 0.6;
+      opacity: 0.65;
       cursor: not-allowed;
     }
 
-    /* Alert Warning */
-    .alert-important {
-      background: rgba(234, 179, 8, 0.12);
-      border: 1px solid rgba(234, 179, 8, 0.45);
-      border-radius: 12px;
-      padding: 14px;
-      margin-bottom: 18px;
-      display: flex;
-      gap: 12px;
-      align-items: flex-start;
-      text-align: left;
-    }
-
-    .alert-important-icon {
-      font-size: 22px;
-      line-height: 1;
-      flex-shrink: 0;
-    }
-
-    .alert-important-body strong {
-      display: block;
-      color: #fde047;
-      font-size: 13px;
-      font-weight: 700;
-      margin-bottom: 4px;
-      text-transform: uppercase;
-      letter-spacing: 0.3px;
-    }
-
-    .alert-important-body p {
-      font-size: 12px;
-      color: #fef08a;
-      line-height: 1.45;
-      margin: 0;
-    }
-
-    /* Error Message */
-    .alert-error {
-      background: rgba(239, 68, 68, 0.12);
-      border: 1px solid rgba(239, 68, 68, 0.3);
-      color: #fca5a5;
-      padding: 12px;
-      border-radius: 10px;
-      font-size: 13px;
-      font-weight: 500;
-      margin-bottom: 16px;
-      display: none;
-      align-items: center;
-      gap: 8px;
-    }
-
-    /* ─── TELA 2: PIX GERADO ─── */
+    /* ─── ETAPA 2 NO CHECKOUT: PIX GERADO ─── */
     .pix-view {
       display: none;
       text-align: center;
@@ -326,13 +889,25 @@
       font-size: 18px;
       font-weight: 700;
       margin-bottom: 4px;
-      color: #fff;
+      color: #ffffff;
     }
 
     .pix-subtitle {
       font-size: 13px;
-      color: var(--text-muted);
-      margin-bottom: 18px;
+      color: #94a3b8;
+      margin-bottom: 16px;
+      line-height: 1.45;
+    }
+
+    .pix-active-pill {
+      background: rgba(31, 61, 255, 0.16);
+      border: 1px solid rgba(96, 165, 250, 0.32);
+      border-radius: 10px;
+      padding: 10px 12px;
+      margin-bottom: 14px;
+      font-size: 12px;
+      color: #bfdbfe;
+      word-break: break-word;
     }
 
     .qr-container {
@@ -341,7 +916,7 @@
       border-radius: 14px;
       display: inline-block;
       margin: 0 auto 16px;
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+      box-shadow: 0 10px 26px rgba(0, 0, 0, 0.48);
     }
 
     .qr-container img {
@@ -352,10 +927,10 @@
 
     .btn-copy {
       width: 100%;
-      height: 48px;
-      background: rgba(255, 255, 255, 0.08);
-      border: 1px solid rgba(255, 255, 255, 0.15);
-      color: #fff;
+      height: 46px;
+      background: rgba(20, 27, 65, 0.9);
+      border: 1px solid rgba(110, 134, 240, 0.28);
+      color: #ffffff;
       border-radius: 10px;
       font-size: 14px;
       font-weight: 600;
@@ -369,21 +944,22 @@
     }
 
     .btn-copy:hover {
-      background: rgba(255, 255, 255, 0.14);
+      background: rgba(37, 99, 235, 0.24);
+      border-color: rgba(96, 165, 250, 0.45);
     }
 
     .pix-code-preview {
-      background: #0f131a;
-      border: 1px dashed rgba(255, 255, 255, 0.15);
+      background: #070a1e;
+      border: 1px dashed rgba(99, 122, 220, 0.3);
       padding: 10px 12px;
       border-radius: 8px;
-      font-family: monospace;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
       font-size: 11px;
       color: #94a3b8;
       word-break: break-all;
-      max-height: 52px;
+      max-height: 56px;
       overflow-y: auto;
-      margin-bottom: 18px;
+      margin-bottom: 16px;
     }
 
     .status-pulse {
@@ -391,69 +967,80 @@
       align-items: center;
       justify-content: center;
       gap: 8px;
-      font-size: 13px;
+      font-size: 12.5px;
       font-weight: 600;
-      color: #38bdf8;
-      background: rgba(56, 189, 248, 0.08);
-      border: 1px solid rgba(56, 189, 248, 0.2);
+      color: #93c5fd;
+      background: rgba(37, 99, 235, 0.14);
+      border: 1px solid rgba(59, 130, 246, 0.28);
       padding: 10px 14px;
       border-radius: 10px;
-      margin-top: 10px;
+      margin-top: 8px;
     }
 
     .pulse-dot {
       width: 8px;
       height: 8px;
-      background: #38bdf8;
+      background: #60a5fa;
       border-radius: 50%;
-      box-shadow: 0 0 0 0 rgba(56, 189, 248, 0.7);
+      box-shadow: 0 0 0 0 rgba(96, 165, 250, 0.7);
       animation: pulse 1.6s infinite;
     }
 
     @keyframes pulse {
       0% {
         transform: scale(0.95);
-        box-shadow: 0 0 0 0 rgba(56, 189, 248, 0.7);
+        box-shadow: 0 0 0 0 rgba(96, 165, 250, 0.7);
       }
       70% {
         transform: scale(1);
-        box-shadow: 0 0 0 8px rgba(56, 189, 248, 0);
+        box-shadow: 0 0 0 8px rgba(96, 165, 250, 0);
       }
       100% {
         transform: scale(0.95);
-        box-shadow: 0 0 0 0 rgba(56, 189, 248, 0);
+        box-shadow: 0 0 0 0 rgba(96, 165, 250, 0);
       }
     }
 
-    /* ─── TELA 3: PAGAMENTO APROVADO / SUCESSO ─── */
+    .btn-secondary-link {
+      margin-top: 12px;
+      background: transparent;
+      border: none;
+      color: #94a3b8;
+      font-size: 12.5px;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: underline;
+      text-underline-offset: 3px;
+    }
+
+    .btn-secondary-link:hover {
+      color: #ffffff;
+    }
+
+    /* ─── ETAPA 3: PAGAMENTO APROVADO / SUCESSO ─── */
     .success-view {
       display: none;
       text-align: center;
-      padding: 10px 0;
-      animation: fadeIn 0.4s ease-out;
-    }
-
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(8px); }
-      to { opacity: 1; transform: translateY(0); }
+      padding: 8px 0;
+      animation: screenReveal 0.4s ease-out;
     }
 
     .success-icon-wrap {
-      width: 76px;
-      height: 76px;
-      background: rgba(34, 197, 94, 0.15);
+      width: 72px;
+      height: 72px;
+      background: rgba(34, 197, 94, 0.14);
       border: 2px solid #22c55e;
       border-radius: 50%;
       display: flex;
       align-items: center;
       justify-content: center;
-      margin: 0 auto 18px;
-      box-shadow: 0 0 24px rgba(34, 197, 94, 0.4);
+      margin: 0 auto 16px;
+      box-shadow: 0 0 24px rgba(34, 197, 94, 0.38);
     }
 
     .success-icon-wrap svg {
-      width: 42px;
-      height: 42px;
+      width: 38px;
+      height: 38px;
       color: #22c55e;
     }
 
@@ -465,24 +1052,25 @@
     }
 
     .success-subtitle {
-      font-size: 14px;
+      font-size: 13.5px;
       color: #94a3b8;
-      margin-bottom: 22px;
+      margin-bottom: 18px;
       line-height: 1.5;
     }
 
     .success-info-box {
-      background: rgba(34, 197, 94, 0.08);
-      border: 1px solid rgba(34, 197, 94, 0.25);
-      border-radius: 12px;
-      padding: 18px 16px;
+      background: var(--navy-row);
+      border: 1px solid var(--navy-row-border);
+      border-radius: 10px;
+      padding: 14px;
       text-align: left;
-      margin-bottom: 22px;
+      margin-bottom: 16px;
     }
 
     .success-info-row {
       display: flex;
       justify-content: space-between;
+      gap: 10px;
       font-size: 13px;
       margin-bottom: 8px;
     }
@@ -490,7 +1078,7 @@
     .success-info-row:last-child {
       margin-bottom: 0;
       padding-top: 8px;
-      border-top: 1px dashed rgba(255, 255, 255, 0.1);
+      border-top: 1px dashed rgba(99, 122, 220, 0.24);
     }
 
     .success-info-label {
@@ -499,7 +1087,9 @@
 
     .success-info-val {
       font-weight: 700;
-      color: #fff;
+      color: #ffffff;
+      word-break: break-word;
+      text-align: right;
     }
 
     .success-info-val.highlight {
@@ -507,56 +1097,35 @@
     }
 
     .app-return-box {
-      background: rgba(255, 255, 255, 0.04);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      border-radius: 12px;
-      padding: 16px;
-      font-size: 14px;
+      background: rgba(31, 61, 255, 0.14);
+      border: 1px solid rgba(96, 165, 250, 0.3);
+      border-radius: 10px;
+      padding: 14px;
+      font-size: 13.5px;
       line-height: 1.5;
       color: #e2e8f0;
-      margin-bottom: 20px;
+      margin-bottom: 16px;
       text-align: left;
     }
 
     .app-return-box strong {
-      color: #38bdf8;
+      color: #93c5fd;
     }
 
-    .btn-return-app {
-      width: 100%;
-      height: 50px;
-      background: rgba(255, 255, 255, 0.1);
-      border: 1px solid rgba(255, 255, 255, 0.2);
-      color: #fff;
-      border-radius: 12px;
-      font-size: 15px;
-      font-weight: 700;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      cursor: pointer;
-      text-decoration: none;
-    }
-
-    .btn-return-app:hover {
-      background: rgba(255, 255, 255, 0.16);
-    }
-
-    /* Toast Notification */
+    /* Toast */
     .toast {
       position: fixed;
       bottom: 24px;
       left: 50%;
       transform: translateX(-50%) translateY(100px);
-      background: #1e293b;
-      border: 1px solid #334155;
-      color: #fff;
+      background: #0f1636;
+      border: 1px solid rgba(99, 122, 220, 0.4);
+      color: #ffffff;
       padding: 12px 20px;
       border-radius: 999px;
       font-size: 13px;
       font-weight: 600;
-      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.6);
+      box-shadow: 0 12px 28px rgba(0, 0, 0, 0.7);
       display: flex;
       align-items: center;
       gap: 8px;
@@ -569,194 +1138,357 @@
       transform: translateX(-50%) translateY(0);
     }
 
-    /* Footer */
     .checkout-footer {
       text-align: center;
       font-size: 11px;
       color: #64748b;
-      margin-top: 24px;
+      margin-top: 22px;
       line-height: 1.5;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .plan-ambient-aura,
+      .plan-border-beam,
+      .plan-popular-badge,
+      .pulse-dot,
+      .screen {
+        animation: none !important;
+      }
+      .plan-card,
+      .roll-char {
+        transition: none !important;
+      }
     }
   </style>
 </head>
 
-<body>
+<body class="theme-plans">
 
-  <div class="container">
+  <!-- =========================================================
+       TELA 1: ESCOLHA DE PLANO (R$ 29,00 — Preto + Azul Escuro Sutil)
+       ========================================================= -->
+  <section id="screenPlans" class="screen active" aria-label="Escolha seu plano">
+    <div class="plans-shell">
+      <header class="brand-header">
+        <img
+          src="/drawable/app_logo_wordmark_arctic_blue.png"
+          onerror="this.onerror=function(){this.style.display='none'; var ft=document.getElementById('fallbackTitle'); if(ft) ft.style.display='block';}; this.src='drawable/app_logo_wordmark_arctic_blue.png';"
+          alt="Cine Ultimate"
+          class="brand-logo"
+        />
+        <div id="fallbackTitle" class="brand-title" style="display:none;">Cine Ultimate</div>
+      </header>
 
-    <!-- Top Brand Header -->
-    <header class="brand-header">
-      <img src="/drawable/app_logo_wordmark.png" onerror="this.onerror=null; this.src='drawable/app_logo_wordmark.png'; this.style.display='inline-block'" alt="Cine Ultimate" class="brand-logo" />
-      <div id="fallbackTitle" class="brand-title" style="display:none;">Cine Ultimate</div>
-      <div>
-        <span class="security-badge">
-          <svg width="12" height="12" fill="currentColor" viewBox="0 0 24 24"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm-2 16l-4-4 1.41-1.41L10 14.17l6.59-6.59L18 9l-8 8z"/></svg>
-          Checkout Oficial • Liberação Instantânea
-        </span>
-      </div>
-    </header>
+      <div class="plans-hero">
+        <h1>Escolha seu plano</h1>
+        <p>Libere acesso completo ao Cine Ultimate sem mensalidades.</p>
 
-    <!-- Main Checkout Card -->
-    <main class="card">
-
-      <!-- Plan Summary -->
-      <section class="plan-summary">
-        <div class="plan-info">
-          <h2>Plano Acesso Completo</h2>
-          <p>Filmes, Séries, Canais 4K & Sala 3D</p>
-        </div>
-        <div class="plan-price">
-          <div class="val" id="planPriceVal">R$ 29,00</div>
-          <div class="tag">Pagamento Único</div>
-        </div>
-      </section>
-
-      <!-- Key Features -->
-      <div class="features-list">
-        <div class="feature-item">
-          <svg fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg>
-          Sem mensalidades
-        </div>
-        <div class="feature-item">
-          <svg fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg>
-          Canais 4K & Full HD
-        </div>
-        <div class="feature-item">
-          <svg fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg>
-          Sala Cinema 3D
-        </div>
-        <div class="feature-item">
-          <svg fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg>
-          Liberação Automática
-        </div>
-      </div>
-
-      <!-- Error Alert -->
-      <div id="errorAlert" class="alert-error">
-        <svg width="18" height="18" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path></svg>
-        <span id="errorMessage">Ocorreu um erro ao processar.</span>
-      </div>
-
-      <!-- ─── ETAPA 1: FORMULÁRIO DE DADOS OBRIGATÓRIOS ─── -->
-      <form id="checkoutForm" onsubmit="handleCreatePix(event)">
-        
-        <!-- Alerta de Segurança e Validação de Gmail -->
-        <div class="alert-important">
-          <div class="alert-important-icon">⚠️</div>
-          <div class="alert-important-body">
-            <strong>AVISO OBRIGATÓRIO (GMAIL DE ACESSO):</strong>
-            <p>O <strong>mesmo Gmail</strong> informado neste pagamento será a sua chave de acesso exclusiva no aplicativo Cine Ultimate. Após o pagamento PIX de <span id="planPriceAlert">R$ 29,00</span>, a criação de conta só será liberada para este Gmail exato.</p>
+        <div class="billing-bar">
+          <div class="billing-radiogroup" role="radiogroup" aria-label="Tipo de acesso">
+            <button type="button" class="billing-pill-btn" role="radio" aria-checked="true" onclick="triggerRollPreview()">
+              <span class="billing-pill-bg" aria-hidden="true"></span>
+              <span>Pagamento Único</span>
+            </button>
           </div>
+          <span class="billing-save-badge">Sem mensalidade</span>
         </div>
+      </div>
 
-        <!-- Campo 1: Nome -->
-        <div class="form-group">
-          <label class="form-label" for="clientName">Nome Completo <span class="req">*</span></label>
-          <input type="text" id="clientName" class="form-control" placeholder="Ex: Carlos Oliveira" required autocomplete="name" />
-        </div>
+      <ul class="plan-grid-single">
+        <li id="planTiltWrap" class="plan-tilt-wrap">
+          <span class="plan-ambient-aura" aria-hidden="true"></span>
 
-        <!-- Campo 2: Gmail (Chave de Acesso no App) -->
-        <div class="form-group">
-          <label class="form-label" for="clientEmail">Seu Gmail de Acesso ao App <span class="req">*</span></label>
-          <input type="email" id="clientEmail" class="form-control" placeholder="seu-email@gmail.com" required autocomplete="email" />
-          <div class="form-hint" style="color: #fde047; font-weight: 600;">⚠️ Atenção: Certifique-se de digitar o Gmail que você usará no Cine Ultimate.</div>
-        </div>
+          <div id="planTiltCard" class="plan-card">
+            <!-- Borda com luz animada azul escuro sutil -->
+            <span class="plan-border-runner" aria-hidden="true">
+              <span class="plan-border-beam"></span>
+              <span class="plan-border-mask"></span>
+            </span>
 
-        <!-- Campo 3: Telefone / WhatsApp -->
-        <div class="form-group">
-          <label class="form-label" for="clientPhone">Celular / WhatsApp <span class="req">*</span></label>
-          <input type="tel" id="clientPhone" class="form-control" placeholder="(11) 99999-9999" required autocomplete="tel" oninput="formatPhone(this)" />
-          <div class="form-hint">Para envio de comprovante e suporte técnico imediato.</div>
-        </div>
+            <!-- Brilho dinâmico no cursor -->
+            <span id="planGlare" class="plan-glare" aria-hidden="true"></span>
 
-        <!-- Botão CTA -->
-        <button type="submit" id="btnSubmit" class="btn-submit">
-          <svg width="18" height="18" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 14.5v-3h3l-4-5-4 5h3v3h2z"/></svg>
-          <span id="planPayButtonLabel">Pagar R$ 29,00 via PIX</span>
+            <!-- Selo topo direito -->
+            <span class="plan-popular-badge">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z" />
+              </svg>
+              Plano Único
+            </span>
+
+            <div class="plan-content">
+              <h2 class="plan-name">Acesso Completo</h2>
+              <p class="plan-tagline">Filmes, Séries, Canais 4K &amp; Sala Cinema 3D</p>
+
+              <p class="plan-price-row">
+                <span class="plan-currency">R$</span>
+                <span id="planHeroDigits" class="plan-amount-digits" aria-label="29">
+                  <span class="roll-slot"><span class="roll-char">2</span></span>
+                  <span class="roll-slot"><span class="roll-char">9</span></span>
+                </span>
+                <span id="planHeroCents" class="plan-cents">,00</span>
+                <span class="plan-period">/ único</span>
+              </p>
+              <p class="plan-billing-note">Pagamento único via PIX • Ativação imediata</p>
+            </div>
+
+            <ul class="plan-features">
+              <li>
+                <span class="feature-check-icon" aria-hidden="true">
+                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+                </span>
+                <span>Acesso vitalício sem mensalidades</span>
+              </li>
+              <li>
+                <span class="feature-check-icon" aria-hidden="true">
+                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+                </span>
+                <span>Canais Ao Vivo 4K &amp; Full HD</span>
+              </li>
+              <li>
+                <span class="feature-check-icon" aria-hidden="true">
+                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+                </span>
+                <span>Catálogo completo de Filmes e Séries</span>
+              </li>
+              <li>
+                <span class="feature-check-icon" aria-hidden="true">
+                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+                </span>
+                <span>Sala Cinema 3D e liberação automática no App</span>
+              </li>
+            </ul>
+
+            <button type="button" id="btnPickPlan" class="btn-pick-plan" onclick="selectPlanAndProceed()">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M20 6 9 17l-5-5"/>
+              </svg>
+              <span id="btnPickPlanText">Escolher plano • R$ 29,00</span>
+            </button>
+          </div>
+        </li>
+      </ul>
+
+      <div class="plans-security-footnote">
+        <svg width="13" height="13" fill="#60a5fa" viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm-2 16l-4-4 1.41-1.41L10 14.17l6.59-6.59L18 9l-8 8z"/>
+        </svg>
+        <span>Checkout Oficial • Mercado Pago PIX &amp; Liberação Instantânea</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- =========================================================
+       TELA 2: CHECKOUT E PIX (Design Navy/Indigo estilo Imagem 2)
+       ========================================================= -->
+  <section id="screenCheckout" class="screen" aria-label="Checkout de pagamento">
+    <div class="checkout-container">
+
+      <div class="checkout-topbar">
+        <img
+          src="/drawable/app_logo_wordmark_arctic_blue.png"
+          onerror="this.onerror=null; this.src='drawable/app_logo_wordmark_arctic_blue.png';"
+          alt="Cine Ultimate"
+          class="checkout-mini-logo"
+        />
+        <button type="button" id="btnBackToPlans" class="btn-back-plans" onclick="backToPlans()">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="m15 18-6-6 6-6"/>
+          </svg>
+          Trocar plano
         </button>
-      </form>
-
-      <!-- ─── ETAPA 2: QR CODE E CÓDIGO PIX ─── -->
-      <div id="pixView" class="pix-view">
-        <h3 class="pix-title">Pague com o PIX Copia e Cola</h3>
-        <p class="pix-subtitle">Abra o app do seu banco e selecione a opção <strong>PIX Copia e Cola</strong>:</p>
-
-        <div style="background: rgba(34, 197, 94, 0.1); border: 1px solid rgba(34, 197, 94, 0.3); border-radius: 10px; padding: 10px 14px; margin-bottom: 14px; font-size: 12px; color: #4ade80;">
-          Liberando acesso para: <strong id="pixActiveEmail" style="color:#fff;"></strong>
-        </div>
-
-        <!-- QR Code -->
-        <div class="qr-container">
-          <img id="qrCodeImage" src="" alt="QR Code PIX R$ 29,00" />
-        </div>
-
-        <!-- Botão Copiar Código -->
-        <button type="button" class="btn-copy" onclick="copyPixCode()">
-          <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"></path></svg>
-          <span id="btnCopyText">Copiar Código PIX</span>
-        </button>
-
-        <div id="pixCodeText" class="pix-code-preview"></div>
-
-        <!-- Radar de Verificação Automática -->
-        <div class="status-pulse">
-          <div class="pulse-dot"></div>
-          <span id="pixStatusLabel">Verificando seu pagamento automaticamente...</span>
-        </div>
-
-        <button type="button" id="btnManualCheckPix" class="btn-submit" style="margin-top: 14px;" onclick="forceCheckPixStatusNow()">
-          <span>✓ Já fiz o pagamento — Confirmar Agora</span>
-        </button>
       </div>
 
-      <!-- ─── ETAPA 3: SUCESSO / LIBERAÇÃO CONFIRMADA ─── -->
-      <div id="successView" class="success-view">
-        <div class="success-icon-wrap">
-          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
-        </div>
-
-        <h3 class="success-title">Pagamento Confirmado!</h3>
-        <p class="success-subtitle">O seu pagamento de <span id="planPriceSuccess">R$ 29,00</span> foi aprovado pelo Mercado Pago.</p>
-
-        <div class="success-info-box">
-          <div class="success-info-row">
-            <span class="success-info-label">Gmail Liberado:</span>
-            <span id="successEmail" class="success-info-val highlight"></span>
+      <!-- Bloco 1: "Seu Plano" (estilo "Your Cart" da Imagem 2) -->
+      <h2 class="section-heading">Seu Plano</h2>
+      <div class="navy-panel">
+        <div class="navy-item-row">
+          <div class="navy-item-thumb">
+            <img
+              src="/drawable/app_icon_arctic_blue.png"
+              onerror="this.onerror=null; this.src='drawable/app_icon_arctic_blue.png';"
+              alt="Cine Ultimate"
+            />
           </div>
-          <div class="success-info-row">
-            <span class="success-info-label">Plano:</span>
-            <span class="success-info-val">Cine Ultimate Vitalício</span>
+          <div class="navy-item-info">
+            <div class="navy-item-name">Cine Ultimate — Acesso Completo</div>
+            <div class="navy-item-price" id="checkoutItemPrice">R$ 29,00</div>
           </div>
-          <div class="success-info-row">
-            <span class="success-info-label">Status no Sistema:</span>
-            <span class="success-info-val highlight">✓ Acesso Ativado</span>
+          <div class="navy-item-actions">
+            <span class="navy-qty-badge">
+              <span class="navy-circle-dot">1</span>
+            </span>
+            <span class="navy-plan-tag">Único</span>
           </div>
         </div>
-
-        <div class="app-return-box" style="border-color: rgba(34, 197, 94, 0.35); background: rgba(34, 197, 94, 0.08);">
-          🚀 <strong>Redirecionamento Automático para o App:</strong><br />
-          Você será redirecionado para o aplicativo <strong>Cine Ultimate</strong> em instantes para criar sua senha com este mesmo Gmail.<br /><br />
-          Se o aplicativo não abrir automaticamente em alguns segundos, clique no botão abaixo:
-        </div>
-
-        <a id="btnOpenApp" href="#" class="btn-submit" style="text-decoration:none; margin-top: 10px;">
-          <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14h2v2h-2v-2zm0-10h2v8h-2V6z"/></svg>
-          <span>Abrir Cine Ultimate e Criar Senha</span>
-        </a>
       </div>
 
-    </main>
+      <!-- Bloco 2: "Detalhes do Pagamento" (estilo "Price Details" da Imagem 2) -->
+      <h2 class="section-heading spaced">Detalhes do Pagamento</h2>
+      <main class="navy-panel details-pad">
 
-    <!-- Footer -->
-    <footer class="checkout-footer">
-      Ambiente Criptografado &middot; Mercado Pago Instituição de Pagamento &middot; Supabase Database
-    </footer>
+        <!-- Error Alert -->
+        <div id="errorAlert" class="alert-error">
+          <svg width="18" height="18" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
+          </svg>
+          <span id="errorMessage">Ocorreu um erro ao processar.</span>
+        </div>
 
-  </div>
+        <!-- ─── ETAPA 1: FORMULÁRIO DE DADOS OBRIGATÓRIOS ─── -->
+        <form id="checkoutForm" onsubmit="handleCreatePix(event)">
+
+          <div class="price-breakdown">
+            <div class="price-row">
+              <span class="label">Plano Acesso Completo</span>
+              <span class="val" id="planPriceVal">R$ 29,00</span>
+            </div>
+            <div class="price-row">
+              <span class="label">Mensalidade</span>
+              <span class="val">Sem mensalidade</span>
+            </div>
+            <div class="price-row">
+              <span class="label">Liberação no App</span>
+              <span class="val" style="color:#93c5fd;">Automática</span>
+            </div>
+          </div>
+
+          <!-- Alerta de Segurança e Validação de Gmail -->
+          <div class="alert-important">
+            <div class="alert-important-icon">⚠️</div>
+            <div class="alert-important-body">
+              <strong>AVISO OBRIGATÓRIO (GMAIL DE ACESSO):</strong>
+              <p>O <strong>mesmo Gmail</strong> informado neste pagamento será a sua chave de acesso exclusiva no aplicativo Cine Ultimate. Após o pagamento PIX de <span id="planPriceAlert">R$ 29,00</span>, a criação de conta só será liberada para este Gmail exato.</p>
+            </div>
+          </div>
+
+          <!-- Campo 1: Nome -->
+          <div class="form-group">
+            <label class="form-label" for="clientName">Nome Completo <span class="req">*</span></label>
+            <input type="text" id="clientName" class="form-control" placeholder="Ex: Carlos Oliveira" required autocomplete="name" />
+          </div>
+
+          <!-- Campo 2: Gmail -->
+          <div class="form-group">
+            <label class="form-label" for="clientEmail">Seu Gmail de Acesso ao App <span class="req">*</span></label>
+            <input type="email" id="clientEmail" class="form-control" placeholder="seu-email@gmail.com" required autocomplete="email" />
+            <div class="form-hint" style="color: #fde047; font-weight: 600;">⚠️ Atenção: Certifique-se de digitar o Gmail que você usará no Cine Ultimate.</div>
+          </div>
+
+          <!-- Campo 3: Telefone / WhatsApp -->
+          <div class="form-group">
+            <label class="form-label" for="clientPhone">Celular / WhatsApp <span class="req">*</span></label>
+            <input type="tel" id="clientPhone" class="form-control" placeholder="(11) 99999-9999" required autocomplete="tel" oninput="formatPhone(this)" />
+            <div class="form-hint">Para envio de comprovante e suporte técnico imediato.</div>
+          </div>
+
+          <div class="price-row total-row">
+            <span class="label">Total</span>
+            <span class="val" id="planPriceTotal">R$ 29,00</span>
+          </div>
+
+          <button type="submit" id="btnSubmit" class="btn-submit">
+            <svg width="18" height="18" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 14.5v-3h3l-4-5-4 5h3v3h2z"/>
+            </svg>
+            <span id="planPayButtonLabel">Pagar R$ 29,00 via PIX</span>
+          </button>
+        </form>
+
+        <!-- ─── ETAPA 2: QR CODE E CÓDIGO PIX ─── -->
+        <div id="pixView" class="pix-view">
+          <h3 class="pix-title">Pague com o PIX Copia e Cola</h3>
+          <p class="pix-subtitle">Abra o app do seu banco e selecione a opção <strong>PIX Copia e Cola</strong>:</p>
+
+          <div class="pix-active-pill">
+            Liberando acesso para: <strong id="pixActiveEmail" style="color:#ffffff;"></strong>
+          </div>
+
+          <div class="qr-container">
+            <img id="qrCodeImage" src="" alt="QR Code PIX R$ 29,00" />
+          </div>
+
+          <button type="button" class="btn-copy" onclick="copyPixCode()">
+            <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"></path>
+            </svg>
+            <span id="btnCopyText">Copiar Código PIX</span>
+          </button>
+
+          <div id="pixCodeText" class="pix-code-preview"></div>
+
+          <div class="status-pulse">
+            <div class="pulse-dot"></div>
+            <span id="pixStatusLabel">Verificando seu pagamento automaticamente...</span>
+          </div>
+
+          <button type="button" id="btnManualCheckPix" class="btn-submit" style="margin-top: 14px;" onclick="forceCheckPixStatusNow()">
+            <span>✓ Já fiz o pagamento — Confirmar Agora</span>
+          </button>
+
+          <button type="button" id="btnEditCheckoutData" class="btn-secondary-link" onclick="resetCheckoutToForm()">
+            Alterar dados / outro Gmail
+          </button>
+        </div>
+
+        <!-- ─── ETAPA 3: SUCESSO / LIBERAÇÃO CONFIRMADA ─── -->
+        <div id="successView" class="success-view">
+          <div class="success-icon-wrap">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path>
+            </svg>
+          </div>
+
+          <h3 class="success-title">Pagamento Confirmado!</h3>
+          <p class="success-subtitle">O seu pagamento de <span id="planPriceSuccess">R$ 29,00</span> foi aprovado pelo Mercado Pago.</p>
+
+          <div class="success-info-box">
+            <div class="success-info-row">
+              <span class="success-info-label">Gmail Liberado:</span>
+              <span id="successEmail" class="success-info-val highlight"></span>
+            </div>
+            <div class="success-info-row">
+              <span class="success-info-label">Plano:</span>
+              <span class="success-info-val">Cine Ultimate Vitalício</span>
+            </div>
+            <div class="success-info-row">
+              <span class="success-info-label">Status no Sistema:</span>
+              <span class="success-info-val highlight">✓ Acesso Ativado</span>
+            </div>
+          </div>
+
+          <div class="app-return-box">
+            🚀 <strong>Redirecionamento Automático para o App:</strong><br />
+            Você será redirecionado para o aplicativo <strong>Cine Ultimate</strong> em instantes para criar sua senha com este mesmo Gmail.<br /><br />
+            Se o aplicativo não abrir automaticamente em alguns segundos, clique no botão abaixo:
+          </div>
+
+          <a id="btnOpenApp" href="#" class="btn-submit" style="text-decoration:none; margin-top: 10px;">
+            <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14h2v2h-2v-2zm0-10h2v8h-2V6z"/>
+            </svg>
+            <span>Abrir Cine Ultimate e Criar Senha</span>
+          </a>
+        </div>
+
+      </main>
+
+      <footer class="checkout-footer">
+        Ambiente Criptografado &middot; Mercado Pago Instituição de Pagamento &middot; Supabase Database
+      </footer>
+
+    </div>
+  </section>
 
   <!-- Toast Notification -->
   <div id="toast" class="toast">
-    <svg width="16" height="16" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg>
+    <svg width="16" height="16" fill="#4ade80" viewBox="0 0 20 20">
+      <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+    </svg>
     <span id="toastMsg">Código PIX copiado!</span>
   </div>
 
@@ -773,24 +1505,124 @@
     let activeEmail = '';
     let pollingInterval = null;
     let currentRawPixCode = '';
+    let currentFormattedPrice = 'R$ 29,00';
+    let currentWholeDigits = '29';
     const PIX_STATE_STORAGE_KEY = 'cine_active_pix_checkout_v1';
 
+    /* ─── Navegação entre Tela 1 (Planos) e Tela 2 (Checkout) ─── */
+    function showScreen(target) {
+      const plansScreen = document.getElementById('screenPlans');
+      const checkoutScreen = document.getElementById('screenCheckout');
+      if (target === 'checkout') {
+        document.body.classList.remove('theme-plans');
+        document.body.classList.add('theme-checkout');
+        plansScreen.classList.remove('active');
+        checkoutScreen.classList.add('active');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      } else {
+        document.body.classList.remove('theme-checkout');
+        document.body.classList.add('theme-plans');
+        checkoutScreen.classList.remove('active');
+        plansScreen.classList.add('active');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+    }
+
+    function selectPlanAndProceed() {
+      const btnText = document.getElementById('btnPickPlanText');
+      if (btnText) btnText.innerText = 'Selecionado';
+      setTimeout(() => {
+        showScreen('checkout');
+        if (btnText) btnText.innerText = `Escolher plano • ${currentFormattedPrice}`;
+      }, 220);
+    }
+
+    function backToPlans() {
+      hideError();
+      showScreen('plans');
+    }
+
+    /* ─── Efeito Tilt 3D + Glare na Tela 1 ─── */
+    (function bindPlanTilt() {
+      const wrap = document.getElementById('planTiltWrap');
+      const card = document.getElementById('planTiltCard');
+      const glare = document.getElementById('planGlare');
+      if (!wrap || !card || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+      wrap.addEventListener('pointermove', (e) => {
+        if (e.pointerType && e.pointerType !== 'mouse') return;
+        const rect = wrap.getBoundingClientRect();
+        const x = Math.min(1, Math.max(0, (e.clientX - rect.left) / rect.width));
+        const y = Math.min(1, Math.max(0, (e.clientY - rect.top) / rect.height));
+        const rx = (0.5 - y) * 14;
+        const ry = (x - 0.5) * 16;
+        card.style.transform = `rotateX(${rx.toFixed(2)}deg) rotateY(${ry.toFixed(2)}deg) translateZ(18px)`;
+        if (glare) {
+          glare.style.setProperty('--mx', `${(x * 100).toFixed(1)}%`);
+          glare.style.setProperty('--my', `${(y * 100).toFixed(1)}%`);
+        }
+      });
+
+      wrap.addEventListener('pointerleave', () => {
+        card.style.transform = 'rotateX(0deg) rotateY(0deg) translateZ(0px)';
+      });
+    })();
+
+    function renderRollDigits(wholeStr) {
+      const container = document.getElementById('planHeroDigits');
+      if (!container) return;
+      const chars = String(wholeStr || '29').split('');
+      container.setAttribute('aria-label', chars.join(''));
+      container.innerHTML = '';
+      chars.forEach((ch, idx) => {
+        const slot = document.createElement('span');
+        slot.className = 'roll-slot';
+        const span = document.createElement('span');
+        span.className = 'roll-char entering';
+        span.innerText = ch;
+        slot.appendChild(span);
+        container.appendChild(slot);
+        requestAnimationFrame(() => {
+          setTimeout(() => span.classList.remove('entering'), idx * 45);
+        });
+      });
+    }
+
+    function triggerRollPreview() {
+      renderRollDigits(currentWholeDigits);
+    }
+
+    /* ─── Sincronização de Preço com /api/health ─── */
     function formatBrl(amount) {
       const n = Number(amount);
       if (!Number.isFinite(n) || n <= 0) return 'R$ 29,00';
       return 'R$ ' + n.toFixed(2).replace('.', ',');
     }
 
-    function applyPlanPrice(formattedPrice) {
+    function applyPlanPrice(formattedPrice, numericAmount) {
       if (!formattedPrice) return;
-      ['planPriceVal', 'planPriceAlert', 'planPriceSuccess'].forEach(id => {
+      currentFormattedPrice = formattedPrice;
+      ['planPriceVal', 'planPriceAlert', 'planPriceSuccess', 'planPriceTotal', 'checkoutItemPrice'].forEach(id => {
         const el = document.getElementById(id);
         if (el) el.innerText = formattedPrice;
       });
       const btnLabel = document.getElementById('planPayButtonLabel');
       if (btnLabel) btnLabel.innerText = `Pagar ${formattedPrice} via PIX`;
+      const pickLabel = document.getElementById('btnPickPlanText');
+      if (pickLabel) pickLabel.innerText = `Escolher plano • ${formattedPrice}`;
       const qrImg = document.getElementById('qrCodeImage');
       if (qrImg) qrImg.alt = `QR Code PIX ${formattedPrice}`;
+
+      const num = Number(numericAmount);
+      if (Number.isFinite(num) && num > 0) {
+        const parts = num.toFixed(2).split('.');
+        if (parts[0] !== currentWholeDigits) {
+          currentWholeDigits = parts[0];
+          renderRollDigits(currentWholeDigits);
+        }
+        const centsEl = document.getElementById('planHeroCents');
+        if (centsEl) centsEl.innerText = ',' + parts[1];
+      }
     }
 
     async function syncLivePlanPrice() {
@@ -800,11 +1632,12 @@
         const data = await res.json();
         const amount = data?.plan?.amount;
         if (amount !== undefined && amount !== null) {
-          applyPlanPrice(data?.plan?.formattedAmount || formatBrl(amount));
+          applyPlanPrice(data?.plan?.formattedAmount || formatBrl(amount), amount);
         }
       } catch (e) { }
     }
 
+    /* ─── Persistência de Sessão PIX ─── */
     function savePendingPixToSession(payment) {
       try {
         sessionStorage.setItem(PIX_STATE_STORAGE_KEY, JSON.stringify({
@@ -836,9 +1669,27 @@
         activePaymentId = saved.paymentId;
         activeEmail = saved.email;
         currentRawPixCode = saved.qrCode;
+        showScreen('checkout');
         showPixView(saved.email, saved.qrCode, saved.qrCodeBase64 || '');
         startStatusPolling();
       } catch (e) { }
+    }
+
+    function resetCheckoutToForm() {
+      hideError();
+      stopStatusPolling();
+      clearPendingPixFromSession();
+      activePaymentId = null;
+      currentRawPixCode = '';
+      document.getElementById('pixView').style.display = 'none';
+      document.getElementById('checkoutForm').style.display = 'block';
+      const btnBack = document.getElementById('btnBackToPlans');
+      if (btnBack) btnBack.style.display = 'inline-flex';
+      const submitBtn = document.getElementById('btnSubmit');
+      if (submitBtn) {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = `<svg width="18" height="18" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 14.5v-3h3l-4-5-4 5h3v3h2z"/></svg> <span id="planPayButtonLabel">Pagar ${currentFormattedPrice} via PIX</span>`;
+      }
     }
 
     function showPixView(email, qrCode, qrCodeBase64) {
@@ -853,6 +1704,8 @@
       }
       document.getElementById('checkoutForm').style.display = 'none';
       document.getElementById('pixView').style.display = 'block';
+      const btnBack = document.getElementById('btnBackToPlans');
+      if (btnBack) btnBack.style.display = 'none';
     }
 
     syncLivePlanPrice();
@@ -946,13 +1799,12 @@
         });
         showPixView(activeEmail, currentRawPixCode, data.payment.qrCodeBase64 || '');
 
-        // Inicia polling rápido de verificação
         startStatusPolling();
       } catch (err) {
         console.error(err);
         showError(err.message || 'Falha na comunicação com o servidor.');
         btn.disabled = false;
-        btn.innerHTML = `<svg width="18" height="18" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 14.5v-3h3l-4-5-4 5h3v3h2z"/></svg> <span>Tentar Novamente</span>`;
+        btn.innerHTML = `<svg width="18" height="18" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 14.5v-3h3l-4-5-4 5h3v3h2z"/></svg> <span id="planPayButtonLabel">Tentar Novamente</span>`;
       }
     }
 
@@ -1067,7 +1919,11 @@
     // ─── 4. TELA DE SUCESSO E LIBERAÇÃO ───
     function renderSuccessView() {
       clearPendingPixFromSession();
+      showScreen('checkout');
       document.getElementById('pixView').style.display = 'none';
+      document.getElementById('checkoutForm').style.display = 'none';
+      const btnBack = document.getElementById('btnBackToPlans');
+      if (btnBack) btnBack.style.display = 'none';
       document.getElementById('successEmail').innerText = activeEmail;
 
       const payQuery = `email=${encodeURIComponent(activeEmail)}${activePaymentId ? `&paymentId=${encodeURIComponent(activePaymentId)}` : ''}`;
@@ -1077,10 +1933,10 @@
       const btn = document.getElementById('btnOpenApp');
       if (btn) {
         btn.href = deepLink;
-        btn.onclick = function(e) {
+        btn.onclick = function () {
           window.location.href = deepLink;
-          setTimeout(function() {
-            try { window.location.href = deepLinkAlt; } catch(err) {}
+          setTimeout(function () {
+            try { window.location.href = deepLinkAlt; } catch (err) { }
           }, 500);
         };
       }
@@ -1088,15 +1944,14 @@
       document.getElementById('successView').style.display = 'block';
       showToast('🎉 Pagamento aprovado! Abrindo o app...');
 
-      // Redirecionamento imediato para o app Cine Ultimate
-      setTimeout(function() {
+      setTimeout(function () {
         window.location.href = deepLink;
-        setTimeout(function() {
-          try { window.location.href = deepLinkAlt; } catch(err) {}
+        setTimeout(function () {
+          try { window.location.href = deepLinkAlt; } catch (err) { }
         }, 450);
       }, 20);
     }
   </script>
-
 </body>
+
 </html>
