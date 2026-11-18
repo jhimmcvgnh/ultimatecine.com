@@ -1605,6 +1605,9 @@ module.exports = async function handler(req, res) {
                 profile_background_url: p.profile_background_url ?? p.profileBackgroundUrl ?? null,
                 uses_primary_addons: Boolean(p.uses_primary_addons ?? p.usesPrimaryAddons ?? false),
                 uses_primary_plugins: Boolean(p.uses_primary_plugins ?? p.usesPrimaryPlugins ?? false),
+                pin_enabled: Boolean(p.pin_enabled ?? p.pinEnabled ?? false),
+                pin_salt: p.pin_salt ?? p.pinSalt ?? null,
+                pin_digest: p.pin_digest ?? p.pinDigest ?? null,
             }));
 
             const updatedMeta = {
