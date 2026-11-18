@@ -57,6 +57,72 @@ function normalizeEmail(email) {
     return String(email || '').trim().toLowerCase();
 }
 
+const TRIAL_PLAN_ID = 'trial_20d';
+const TRIAL_DURATION_DAYS = 20;
+const TRIAL_DURATION_MS = TRIAL_DURATION_DAYS * 24 * 60 * 60 * 1000;
+const TRIAL_DEVICE_PREFIX = 'trial_dev:';
+
+function hashDeviceFingerprint(rawDeviceId) {
+    const clean = String(rawDeviceId || '').trim();
+    if (clean.length < 8) return '';
+    const crypto = require('crypto');
+    return crypto
+        .createHash('sha256')
+        .update(`cine_ultimate_trial_v1|${clean}`)
+        .digest('hex')
+        .slice(0, 40);
+}
+
+function evaluateTrialEntitlement(ent) {
+    if (!ent || ent.plan_id !== TRIAL_PLAN_ID || ent.status === 'active') {
+        return {
+            isTrial: false,
+            isTrialActive: false,
+            isTrialExpired: false,
+            trialStartedAt: null,
+            trialExpiresAt: null,
+            trialExpiresAtMs: null,
+            trialDaysRemaining: 0
+        };
+    }
+    const startMs = Date.parse(ent.activated_at || ent.created_at || '');
+    if (!Number.isFinite(startMs)) {
+        return {
+            isTrial: true,
+            isTrialActive: false,
+            isTrialExpired: true,
+            trialStartedAt: null,
+            trialExpiresAt: null,
+            trialExpiresAtMs: 0,
+            trialDaysRemaining: 0
+        };
+    }
+    const expiresMs = startMs + TRIAL_DURATION_MS;
+    const remainingMs = expiresMs - Date.now();
+    const isTrialActive = remainingMs > 0;
+    const trialDaysRemaining = isTrialActive
+        ? Math.max(1, Math.ceil(remainingMs / (24 * 60 * 60 * 1000)))
+        : 0;
+    return {
+        isTrial: true,
+        isTrialActive,
+        isTrialExpired: !isTrialActive,
+        trialStartedAt: new Date(startMs).toISOString(),
+        trialExpiresAt: new Date(expiresMs).toISOString(),
+        trialExpiresAtMs: expiresMs,
+        trialDaysRemaining
+    };
+}
+
+async function findDeviceTrialEntitlement(deviceHash) {
+    if (!deviceHash) return null;
+    const marker = `${TRIAL_DEVICE_PREFIX}${deviceHash}`;
+    const res = await supaRest(
+        `user_entitlements?select=email,status,user_id,plan_id,amount,activated_at,created_at,last_mp_payment_id&last_mp_payment_id=eq.${encodeURIComponent(marker)}&limit=1`
+    ).catch(() => null);
+    return (Array.isArray(res?.data) && res.data[0]) || null;
+}
+
 const recentSessions = new Map();
 const approvedPaymentCache = new Map();
 const approvedEmailCache = new Map();
@@ -137,7 +203,7 @@ function getCachedApprovedEmail(email) {
     return entry;
 }
 
-async function activateApprovedPayment(mpPaymentId, email, knownHasAccount = null) {
+async function activateApprovedPayment(mpPaymentId, email, knownHasAccount = null, existingEnt = null) {
     const cleanEmail = normalizeEmail(email);
     markSessionApprovedInMemory(mpPaymentId, cleanEmail, knownHasAccount);
     const now = new Date().toISOString();
@@ -150,12 +216,13 @@ async function activateApprovedPayment(mpPaymentId, email, knownHasAccount = nul
         }));
     }
     if (cleanEmail) {
+        const preserveDeviceMarker = String(existingEnt?.last_mp_payment_id || '').startsWith(TRIAL_DEVICE_PREFIX);
         writes.push(supaRest('user_entitlements?on_conflict=email', 'POST', {
             email: cleanEmail,
             plan_id: PLAN_ID,
             amount: PLAN_AMOUNT,
             status: 'active',
-            ...(mpPaymentId ? { last_mp_payment_id: String(mpPaymentId) } : {}),
+            ...(mpPaymentId && !preserveDeviceMarker ? { last_mp_payment_id: String(mpPaymentId) } : {}),
             activated_at: now,
             updated_at: now
         }, { 'Prefer': 'resolution=merge-duplicates' }));
@@ -179,7 +246,7 @@ async function verifyPaymentEntitlement(email, hintPaymentId = null) {
 
     // Executa consultas ao Supabase e (se houver paymentId) ao Mercado Pago em PARALELO (1 único RTT)
     const [entRes, payRes, directMpRes] = await Promise.all([
-        supaRest(`user_entitlements?select=status,user_id,plan_id,amount&email=eq.${encodeURIComponent(cleanEmail)}&limit=1`),
+        supaRest(`user_entitlements?select=status,user_id,plan_id,amount,activated_at,created_at,last_mp_payment_id&email=eq.${encodeURIComponent(cleanEmail)}&limit=1`),
         supaRest(`pix_payments?select=mp_payment_id,email,amount,status,created_at&email=eq.${encodeURIComponent(cleanEmail)}&order=created_at.desc&limit=5`),
         directMpIdToCheck
             ? callMercadoPago('GET', `/v1/payments/${encodeURIComponent(directMpIdToCheck)}`).catch(() => null)
@@ -192,8 +259,20 @@ async function verifyPaymentEntitlement(email, hintPaymentId = null) {
 
     if (isActive) {
         markSessionApprovedInMemory(null, cleanEmail, hasAccount);
-        return { isActive: true, ent, hasAccount };
+        return {
+            isActive: true,
+            isPaid: true,
+            isTrial: false,
+            isTrialExpired: false,
+            trialExpiresAt: null,
+            trialExpiresAtMs: null,
+            trialDaysRemaining: 0,
+            ent,
+            hasAccount
+        };
     }
+
+    const trialState = evaluateTrialEntitlement(ent);
 
     try {
         if (directMpRes) {
@@ -205,8 +284,18 @@ async function verifyPaymentEntitlement(email, hintPaymentId = null) {
                 (!mpEmail || mpEmail === cleanEmail)
             ) {
                 isActive = true;
-                await activateApprovedPayment(directMpIdToCheck, cleanEmail, hasAccount);
-                return { isActive: true, ent, hasAccount };
+                await activateApprovedPayment(directMpIdToCheck, cleanEmail, hasAccount, ent);
+                return {
+                    isActive: true,
+                    isPaid: true,
+                    isTrial: false,
+                    isTrialExpired: false,
+                    trialExpiresAt: null,
+                    trialExpiresAtMs: null,
+                    trialDaysRemaining: 0,
+                    ent,
+                    hasAccount
+                };
             }
         }
 
@@ -216,8 +305,18 @@ async function verifyPaymentEntitlement(email, hintPaymentId = null) {
         );
         if (localApproved) {
             isActive = true;
-            await activateApprovedPayment(localApproved.mp_payment_id, cleanEmail, hasAccount);
-            return { isActive: true, ent, hasAccount };
+            await activateApprovedPayment(localApproved.mp_payment_id, cleanEmail, hasAccount, ent);
+            return {
+                isActive: true,
+                isPaid: true,
+                isTrial: false,
+                isTrialExpired: false,
+                trialExpiresAt: null,
+                trialExpiresAtMs: null,
+                trialDaysRemaining: 0,
+                ent,
+                hasAccount
+            };
         }
 
         const mpIds = payments
@@ -236,10 +335,20 @@ async function verifyPaymentEntitlement(email, hintPaymentId = null) {
             });
             if (validMp) {
                 isActive = true;
-                await activateApprovedPayment(String(validMp.id), cleanEmail, hasAccount);
-                return { isActive: true, ent, hasAccount };
+                await activateApprovedPayment(String(validMp.id), cleanEmail, hasAccount, ent);
+                return {
+                    isActive: true,
+                    isPaid: true,
+                    isTrial: false,
+                    isTrialExpired: false,
+                    trialExpiresAt: null,
+                    trialExpiresAtMs: null,
+                    trialDaysRemaining: 0,
+                    ent,
+                    hasAccount
+                };
             }
-        } else {
+        } else if (!trialState.isTrialActive) {
             // Último recurso se ainda não houver linha em pix_payments
             const searchRes = await callMercadoPago(
                 'GET',
@@ -254,14 +363,44 @@ async function verifyPaymentEntitlement(email, hintPaymentId = null) {
             });
             if (matched) {
                 isActive = true;
-                await activateApprovedPayment(String(matched.id), cleanEmail, hasAccount);
-                return { isActive: true, ent, hasAccount };
+                await activateApprovedPayment(String(matched.id), cleanEmail, hasAccount, ent);
+                return {
+                    isActive: true,
+                    isPaid: true,
+                    isTrial: false,
+                    isTrialExpired: false,
+                    trialExpiresAt: null,
+                    trialExpiresAtMs: null,
+                    trialDaysRemaining: 0,
+                    ent,
+                    hasAccount
+                };
             }
         }
     } catch (e) { }
 
+    if (trialState.isTrial) {
+        return {
+            isActive: trialState.isTrialActive,
+            isPaid: false,
+            isTrial: true,
+            isTrialExpired: trialState.isTrialExpired,
+            trialExpiresAt: trialState.trialExpiresAt,
+            trialExpiresAtMs: trialState.trialExpiresAtMs,
+            trialDaysRemaining: trialState.trialDaysRemaining,
+            ent,
+            hasAccount
+        };
+    }
+
     return {
         isActive,
+        isPaid: isActive,
+        isTrial: false,
+        isTrialExpired: false,
+        trialExpiresAt: null,
+        trialExpiresAtMs: null,
+        trialDaysRemaining: 0,
         ent,
         hasAccount
     };
@@ -471,6 +610,7 @@ module.exports = async function handler(req, res) {
             const body = await getRequestBody(req);
             const name = String(body.name || '').trim();
             const email = normalizeEmail(body.email);
+            const lockedTrialEmail = normalizeEmail(body.lockedTrialEmail);
             const phone = String(body.phone || '').trim();
             const sessionId = String(body.sessionId || '').trim();
             const phoneDigits = phone.replace(/\D/g, '');
@@ -480,6 +620,13 @@ module.exports = async function handler(req, res) {
             }
             if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
                 return sendJson(res, 400, { ok: false, error: 'Informe um Gmail válido. Ele será seu login no aplicativo.' });
+            }
+            if (lockedTrialEmail && email !== lockedTrialEmail) {
+                return sendJson(res, 403, {
+                    ok: false,
+                    code: 'TRIAL_EMAIL_MISMATCH',
+                    error: `Para liberar seu acesso após o teste grátis, você deve usar obrigatoriamente o mesmo Gmail cadastrado no teste (${lockedTrialEmail}).`
+                });
             }
             if (phoneDigits.length < 8) {
                 return sendJson(res, 400, { ok: false, error: 'Informe um telefone/WhatsApp válido com DDD.' });
@@ -551,20 +698,22 @@ module.exports = async function handler(req, res) {
                     created_at: now,
                     updated_at: now
                 }, { 'Prefer': 'resolution=merge-duplicates' }),
-                supaRest(`user_entitlements?select=status,user_id,plan_id&email=eq.${encodeURIComponent(email)}&limit=1`)
+                supaRest(`user_entitlements?select=status,user_id,plan_id,last_mp_payment_id&email=eq.${encodeURIComponent(email)}&limit=1`)
             ]);
 
-            // Não rebaixa uma assinatura já ativa caso alguém gere novo PIX para o mesmo e-mail
+            // Não rebaixa uma assinatura já ativa nem apaga o vínculo de teste grátis enquanto o PIX ainda estiver pendente
             const existingEnt = Array.isArray(existingEntRes.data) && existingEntRes.data[0];
             if (existingEnt?.status !== 'active') {
+                const isExistingTrial = existingEnt?.plan_id === TRIAL_PLAN_ID && mpRes.status !== 'approved';
+                const preserveDeviceMarker = String(existingEnt?.last_mp_payment_id || '').startsWith(TRIAL_DEVICE_PREFIX);
                 await supaRest('user_entitlements?on_conflict=email', 'POST', {
                     email,
                     payer_name: name,
                     payer_phone: phone,
-                    plan_id: PLAN_ID,
-                    amount: PLAN_AMOUNT,
+                    plan_id: isExistingTrial ? TRIAL_PLAN_ID : PLAN_ID,
+                    amount: isExistingTrial ? 0 : PLAN_AMOUNT,
                     status: mpRes.status === 'approved' ? 'active' : 'pending',
-                    last_mp_payment_id: mpPaymentId,
+                    ...(preserveDeviceMarker ? {} : { last_mp_payment_id: mpPaymentId }),
                     updated_at: now
                 }, { 'Prefer': 'resolution=merge-duplicates' });
             }
@@ -901,45 +1050,162 @@ module.exports = async function handler(req, res) {
             });
         }
 
-        // 5.5 VERIFICAR STATUS DO GMAIL NO SUPABASE + MERCADO PAGO (POST /api/auth/check-email)
+        // 5.5 VERIFICAR STATUS DO GMAIL E DISPOSITIVO NO SUPABASE + MERCADO PAGO (POST /api/auth/check-email)
         if (pathname === '/api/auth/check-email' && req.method === 'POST') {
             const body = await getRequestBody(req);
             const email = normalizeEmail(body.email);
             const paymentId = String(body.paymentId || '').trim() || null;
+            const deviceHash = hashDeviceFingerprint(body.deviceId);
+
+            // Se apenas o deviceId foi enviado (consulta de vínculo de aparelho ao abrir o app)
+            if (!email && deviceHash) {
+                const deviceEnt = await findDeviceTrialEntitlement(deviceHash);
+                if (!deviceEnt?.email) {
+                    return sendJson(res, 200, {
+                        ok: true,
+                        email: '',
+                        entitlementActive: false,
+                        isPaid: false,
+                        isTrial: false,
+                        isTrialExpired: false,
+                        trialExpiresAt: null,
+                        trialExpiresAtMs: null,
+                        trialDaysRemaining: 0,
+                        hasAccount: false,
+                        boundTrialEmail: null
+                    });
+                }
+                const boundEmail = normalizeEmail(deviceEnt.email);
+                const statusInfo = await verifyPaymentEntitlement(boundEmail, paymentId);
+                return sendJson(res, 200, {
+                    ok: true,
+                    email: boundEmail,
+                    entitlementActive: statusInfo.isActive,
+                    isPaid: Boolean(statusInfo.isPaid),
+                    isTrial: Boolean(statusInfo.isTrial),
+                    isTrialExpired: Boolean(statusInfo.isTrialExpired),
+                    trialExpiresAt: statusInfo.trialExpiresAt || null,
+                    trialExpiresAtMs: statusInfo.trialExpiresAtMs || null,
+                    trialDaysRemaining: statusInfo.trialDaysRemaining || 0,
+                    hasAccount: statusInfo.hasAccount,
+                    boundTrialEmail: boundEmail
+                });
+            }
+
             if (!email) {
                 return sendJson(res, 400, { ok: false, error: 'Email é obrigatório.' });
             }
-            const { isActive, hasAccount } = await verifyPaymentEntitlement(email, paymentId);
+
+            const [statusInfo, deviceEnt] = await Promise.all([
+                verifyPaymentEntitlement(email, paymentId),
+                deviceHash ? findDeviceTrialEntitlement(deviceHash) : Promise.resolve(null)
+            ]);
+            const boundTrialEmail = deviceEnt?.email ? normalizeEmail(deviceEnt.email) : null;
+
             return sendJson(res, 200, {
                 ok: true,
                 email,
-                entitlementActive: isActive,
-                hasAccount
+                entitlementActive: statusInfo.isActive,
+                isPaid: Boolean(statusInfo.isPaid),
+                isTrial: Boolean(statusInfo.isTrial),
+                isTrialExpired: Boolean(statusInfo.isTrialExpired),
+                trialExpiresAt: statusInfo.trialExpiresAt || null,
+                trialExpiresAtMs: statusInfo.trialExpiresAtMs || null,
+                trialDaysRemaining: statusInfo.trialDaysRemaining || 0,
+                hasAccount: statusInfo.hasAccount,
+                boundTrialEmail
             });
         }
 
         // 6. CADASTRO / CRIAR CONTA (POST /api/auth/register)
-        // Regra obrigatória: Só cadastra se o Gmail tiver pagamento PIX aprovado!
+        // Regra obrigatória: Cadastra se o Gmail tiver pagamento PIX aprovado OU se for ativação de Teste Grátis (1 por dispositivo)!
         if (pathname === '/api/auth/register' && req.method === 'POST') {
             const body = await getRequestBody(req);
             const email = normalizeEmail(body.email);
             const password = String(body.password || '');
             const name = String(body.name || '').trim() || email.split('@')[0];
+            const isTrialRequest = Boolean(body.isTrial);
+            const deviceHash = hashDeviceFingerprint(body.deviceId);
 
             if (!email || !password || password.length < 6) {
                 return sendJson(res, 400, { ok: false, error: 'Informe um Gmail válido e senha de pelo menos 6 caracteres.' });
             }
 
-            // Verifica se possui acesso ativo aprovado no Supabase ou Mercado Pago
-            const { isActive } = await verifyPaymentEntitlement(email);
+            if (isTrialRequest && !email.endsWith('@gmail.com')) {
+                return sendJson(res, 400, {
+                    ok: false,
+                    code: 'GMAIL_REQUIRED',
+                    error: 'Para ativar o Teste Grátis de 20 dias, informe obrigatoriamente uma conta @gmail.com.'
+                });
+            }
 
-            if (!isActive) {
+            if (isTrialRequest && !deviceHash) {
+                return sendJson(res, 400, {
+                    ok: false,
+                    code: 'DEVICE_ID_REQUIRED',
+                    error: 'Não foi possível validar a segurança do aparelho para o teste grátis. Reinicie o aplicativo.'
+                });
+            }
+
+            // Consulta status do e-mail e (se for teste grátis ou houver deviceId) o vínculo do aparelho em paralelo
+            const [entStatus, deviceEnt] = await Promise.all([
+                verifyPaymentEntitlement(email),
+                deviceHash ? findDeviceTrialEntitlement(deviceHash) : Promise.resolve(null)
+            ]);
+
+            const boundDeviceEmail = deviceEnt?.email ? normalizeEmail(deviceEnt.email) : null;
+
+            // Proteção Anti-Burla e Anti-Inflação do Banco:
+            // Se este dispositivo físico já ativou um teste grátis com OUTRO Gmail, bloqueia antes de criar usuário ou linha no banco!
+            if (boundDeviceEmail && boundDeviceEmail !== email && !entStatus.isPaid) {
+                const boundTrialState = evaluateTrialEntitlement(deviceEnt);
+                return sendJson(res, 403, {
+                    ok: false,
+                    code: 'DEVICE_TRIAL_ALREADY_USED',
+                    boundTrialEmail: boundDeviceEmail,
+                    isTrialExpired: Boolean(boundTrialState.isTrialExpired && deviceEnt?.status !== 'active'),
+                    error: boundTrialState.isTrialExpired && deviceEnt?.status !== 'active'
+                        ? `Este aparelho já utilizou os 20 dias de teste grátis com o Gmail ${boundDeviceEmail}. Para continuar assistindo, realize o pagamento único de ${formatBrl(PLAN_AMOUNT)} usando obrigatoriamente o Gmail ${boundDeviceEmail}.`
+                        : `Este aparelho já possui um teste grátis vinculado ao Gmail ${boundDeviceEmail}. Não é permitido criar múltiplas contas no mesmo dispositivo — faça login com ${boundDeviceEmail}.`
+                });
+            }
+
+            // Se o próprio Gmail informado já teve teste grátis e os 20 dias expiraram sem pagamento:
+            if (entStatus.isTrialExpired) {
+                return sendJson(res, 402, {
+                    ok: false,
+                    code: 'TRIAL_EXPIRED',
+                    boundTrialEmail: email,
+                    isTrialExpired: true,
+                    error: `Seu teste grátis de 20 dias para ${email} já expirou! Para liberar o acesso definitivo, realize o pagamento único de ${formatBrl(PLAN_AMOUNT)} no site oficial usando este mesmo Gmail (${email}).`
+                });
+            }
+
+            // Se não for solicitação de teste grátis e ainda não tiver pagamento/teste ativo:
+            if (!isTrialRequest && !entStatus.isActive) {
                 return sendJson(res, 403, {
                     ok: false,
                     code: 'PAYMENT_REQUIRED',
+                    ...(boundDeviceEmail ? { boundTrialEmail: boundDeviceEmail } : {}),
                     error: `Acesso negado: O Gmail ${email} ainda não possui pagamento PIX de ${formatBrl(PLAN_AMOUNT)} aprovado. Por favor, conclua o pagamento primeiro.`
                 });
             }
+
+            // Se for solicitação de teste grátis nova (ainda sem pagamento e sem teste anterior):
+            const startingNewTrial = isTrialRequest && !entStatus.isActive && !entStatus.isTrialExpired;
+            const nowIso = new Date().toISOString();
+            const newTrialExpiresMs = Date.now() + TRIAL_DURATION_MS;
+            const newTrialExpiresIso = new Date(newTrialExpiresMs).toISOString();
+
+            const userMetadata = startingNewTrial
+                ? {
+                    name,
+                    is_trial: true,
+                    trial_started_at: nowIso,
+                    trial_expires_at: newTrialExpiresIso,
+                    device_hash: deviceHash
+                }
+                : { name };
 
             // Cria o usuário no Supabase Auth via Admin API
             const authAdminRes = await httpRequest(`${SUPABASE_URL}/auth/v1/admin/users`, {
@@ -953,12 +1219,12 @@ module.exports = async function handler(req, res) {
                 email,
                 password,
                 email_confirm: true,
-                user_metadata: { name }
+                user_metadata: userMetadata
             });
 
             let userId = authAdminRes.data?.id;
 
-            // Se o usuário já existia no auth, valida a senha informada
+            // Se o usuário já existia no auth, valida a senha informada (sem duplicar registros)
             if (authAdminRes.status === 422 || !userId) {
                 const loginRes = await httpRequest(`${SUPABASE_URL}/auth/v1/token?grant_type=password`, {
                     method: 'POST',
@@ -970,15 +1236,33 @@ module.exports = async function handler(req, res) {
 
                 if (loginRes.data?.access_token) {
                     const existingUserId = loginRes.data.user?.id;
-                    markSessionApprovedInMemory(null, email, true);
-                    if (existingUserId) {
-                        try {
-                            await supaRest(`user_entitlements?email=eq.${encodeURIComponent(email)}`, 'PATCH', {
-                                user_id: existingUserId,
-                                updated_at: new Date().toISOString()
-                            });
-                        } catch(e) {}
+                    if (startingNewTrial) {
+                        await supaRest('user_entitlements?on_conflict=email', 'POST', {
+                            email,
+                            user_id: existingUserId || null,
+                            payer_name: name,
+                            plan_id: TRIAL_PLAN_ID,
+                            amount: 0,
+                            status: 'pending',
+                            last_mp_payment_id: `${TRIAL_DEVICE_PREFIX}${deviceHash}`,
+                            activated_at: nowIso,
+                            updated_at: nowIso
+                        }, { 'Prefer': 'resolution=merge-duplicates' });
+                    } else {
+                        markSessionApprovedInMemory(null, email, true);
+                        if (existingUserId) {
+                            try {
+                                await supaRest(`user_entitlements?email=eq.${encodeURIComponent(email)}`, 'PATCH', {
+                                    user_id: existingUserId,
+                                    updated_at: nowIso
+                                });
+                            } catch (e) { }
+                        }
                     }
+                    const effectiveIsTrial = startingNewTrial || Boolean(entStatus.isTrial && !entStatus.isPaid);
+                    const effectiveExpiresIso = startingNewTrial ? newTrialExpiresIso : (entStatus.trialExpiresAt || null);
+                    const effectiveExpiresMs = startingNewTrial ? newTrialExpiresMs : (entStatus.trialExpiresAtMs || null);
+                    const effectiveDaysRemaining = startingNewTrial ? TRIAL_DURATION_DAYS : (entStatus.trialDaysRemaining || 0);
                     return sendJson(res, 200, {
                         ok: true,
                         token: loginRes.data.access_token,
@@ -989,7 +1273,11 @@ module.exports = async function handler(req, res) {
                             email,
                             name,
                             subscriptionActive: true,
-                            planId: PLAN_ID
+                            planId: effectiveIsTrial ? TRIAL_PLAN_ID : PLAN_ID,
+                            isTrial: effectiveIsTrial,
+                            trialExpiresAt: effectiveExpiresIso,
+                            trialExpiresAtMs: effectiveExpiresMs,
+                            trialDaysRemaining: effectiveDaysRemaining
                         }
                     });
                 }
@@ -997,8 +1285,24 @@ module.exports = async function handler(req, res) {
                 return sendJson(res, 409, {
                     ok: false,
                     code: 'ACCOUNT_ALREADY_EXISTS',
+                    boundTrialEmail: boundDeviceEmail || (entStatus.isTrial ? email : null),
                     error: 'Este Gmail já possui uma conta criada. Use a opção "Fazer Login" e informe sua senha correta.'
                 });
+            }
+
+            // Se está iniciando o teste grátis de 20 dias, grava o vínculo único de dispositivo + Gmail em user_entitlements
+            if (startingNewTrial) {
+                await supaRest('user_entitlements?on_conflict=email', 'POST', {
+                    email,
+                    user_id: userId,
+                    payer_name: name,
+                    plan_id: TRIAL_PLAN_ID,
+                    amount: 0,
+                    status: 'pending',
+                    last_mp_payment_id: `${TRIAL_DEVICE_PREFIX}${deviceHash}`,
+                    activated_at: nowIso,
+                    updated_at: nowIso
+                }, { 'Prefer': 'resolution=merge-duplicates' });
             }
 
             // Faz login para gerar token JWT da sessão
@@ -1018,15 +1322,22 @@ module.exports = async function handler(req, res) {
             }
 
             const finalUserId = userId || sessionRes.data.user?.id;
-            markSessionApprovedInMemory(null, email, true);
-            if (finalUserId) {
-                try {
-                    await supaRest(`user_entitlements?email=eq.${encodeURIComponent(email)}`, 'PATCH', {
-                        user_id: finalUserId,
-                        updated_at: new Date().toISOString()
-                    });
-                } catch(e) {}
+            if (!startingNewTrial) {
+                markSessionApprovedInMemory(null, email, true);
+                if (finalUserId) {
+                    try {
+                        await supaRest(`user_entitlements?email=eq.${encodeURIComponent(email)}`, 'PATCH', {
+                            user_id: finalUserId,
+                            updated_at: nowIso
+                        });
+                    } catch (e) { }
+                }
             }
+
+            const effectiveIsTrial = startingNewTrial || Boolean(entStatus.isTrial && !entStatus.isPaid);
+            const effectiveExpiresIso = startingNewTrial ? newTrialExpiresIso : (entStatus.trialExpiresAt || null);
+            const effectiveExpiresMs = startingNewTrial ? newTrialExpiresMs : (entStatus.trialExpiresAtMs || null);
+            const effectiveDaysRemaining = startingNewTrial ? TRIAL_DURATION_DAYS : (entStatus.trialDaysRemaining || 0);
 
             return sendJson(res, 200, {
                 ok: true,
@@ -1038,7 +1349,11 @@ module.exports = async function handler(req, res) {
                     email,
                     name,
                     subscriptionActive: true,
-                    planId: PLAN_ID
+                    planId: effectiveIsTrial ? TRIAL_PLAN_ID : PLAN_ID,
+                    isTrial: effectiveIsTrial,
+                    trialExpiresAt: effectiveExpiresIso,
+                    trialExpiresAtMs: effectiveExpiresMs,
+                    trialDaysRemaining: effectiveDaysRemaining
                 }
             });
         }
@@ -1048,18 +1363,43 @@ module.exports = async function handler(req, res) {
             const body = await getRequestBody(req);
             const email = normalizeEmail(body.email);
             const password = String(body.password || '');
+            const deviceHash = hashDeviceFingerprint(body.deviceId);
 
             if (!email || !password) {
                 return sendJson(res, 400, { ok: false, error: 'Email e senha são obrigatórios.' });
             }
 
-            // Verifica obrigatoriamente se o pagamento está ativo no Supabase ou Mercado Pago ANTES de autenticar
-            const { isActive, ent } = await verifyPaymentEntitlement(email);
+            const [entStatus, deviceEnt] = await Promise.all([
+                verifyPaymentEntitlement(email),
+                deviceHash ? findDeviceTrialEntitlement(deviceHash) : Promise.resolve(null)
+            ]);
+            const { isActive, isPaid, isTrial, isTrialExpired, trialExpiresAt, trialExpiresAtMs, trialDaysRemaining, ent } = entStatus;
+            const boundDeviceEmail = deviceEnt?.email ? normalizeEmail(deviceEnt.email) : null;
+
+            // Impede que um aparelho que já usou teste grátis em outro Gmail faça login com uma segunda conta de teste grátis
+            if (isTrial && !isPaid && boundDeviceEmail && boundDeviceEmail !== email) {
+                return sendJson(res, 403, {
+                    ok: false,
+                    code: 'DEVICE_TRIAL_ALREADY_USED',
+                    boundTrialEmail: boundDeviceEmail,
+                    error: `Este aparelho já está vinculado ao teste grátis do Gmail ${boundDeviceEmail}. Não é permitido usar múltiplas contas de teste no mesmo dispositivo.`
+                });
+            }
 
             if (!isActive) {
+                if (isTrialExpired) {
+                    return sendJson(res, 402, {
+                        ok: false,
+                        code: 'TRIAL_EXPIRED',
+                        boundTrialEmail: email,
+                        isTrialExpired: true,
+                        error: `Seu teste grátis de 20 dias terminou! Para voltar a assistir e consumir conteúdos, realize o pagamento único de ${formatBrl(PLAN_AMOUNT)} no site oficial usando obrigatoriamente o mesmo Gmail do seu teste (${email}).`
+                    });
+                }
                 return sendJson(res, 403, {
                     ok: false,
                     code: 'PAYMENT_EXPIRED_OR_MISSING',
+                    ...(boundDeviceEmail ? { boundTrialEmail: boundDeviceEmail } : {}),
                     error: `Acesso negado: O Gmail ${email} não possui pagamento PIX de ${formatBrl(PLAN_AMOUNT)} aprovado. Realize o pagamento no site oficial.`
                 });
             }
@@ -1081,14 +1421,16 @@ module.exports = async function handler(req, res) {
             }
 
             const loggedUserId = authRes.data.user?.id;
-            markSessionApprovedInMemory(null, email, true);
+            if (isPaid) {
+                markSessionApprovedInMemory(null, email, true);
+            }
             if (loggedUserId && !ent?.user_id) {
                 try {
                     await supaRest(`user_entitlements?email=eq.${encodeURIComponent(email)}`, 'PATCH', {
                         user_id: loggedUserId,
                         updated_at: new Date().toISOString()
                     });
-                } catch(e) {}
+                } catch (e) { }
             }
 
             return sendJson(res, 200, {
@@ -1101,7 +1443,11 @@ module.exports = async function handler(req, res) {
                     email,
                     name: authRes.data.user.user_metadata?.name || email.split('@')[0],
                     subscriptionActive: true,
-                    planId: ent?.plan_id || PLAN_ID
+                    planId: ent?.plan_id || PLAN_ID,
+                    isTrial: Boolean(isTrial && !isPaid),
+                    trialExpiresAt: trialExpiresAt || null,
+                    trialExpiresAtMs: trialExpiresAtMs || null,
+                    trialDaysRemaining: trialDaysRemaining || 0
                 }
             });
         }
@@ -1131,8 +1477,17 @@ module.exports = async function handler(req, res) {
             }
 
             const email = normalizeEmail(refreshRes.data.user.email);
-            const { isActive, ent } = await verifyPaymentEntitlement(email);
+            const { isActive, isPaid, isTrial, isTrialExpired, trialExpiresAt, trialExpiresAtMs, trialDaysRemaining, ent } = await verifyPaymentEntitlement(email);
             if (!isActive) {
+                if (isTrialExpired) {
+                    return sendJson(res, 402, {
+                        ok: false,
+                        code: 'TRIAL_EXPIRED',
+                        boundTrialEmail: email,
+                        isTrialExpired: true,
+                        error: `Seu teste grátis de 20 dias terminou! Realize o pagamento de ${formatBrl(PLAN_AMOUNT)} no site oficial usando o mesmo Gmail (${email}).`
+                    });
+                }
                 return sendJson(res, 403, {
                     ok: false,
                     code: 'PAYMENT_EXPIRED_OR_MISSING',
@@ -1150,7 +1505,11 @@ module.exports = async function handler(req, res) {
                     email,
                     name: refreshRes.data.user.user_metadata?.name || email.split('@')[0],
                     subscriptionActive: true,
-                    planId: ent?.plan_id || PLAN_ID
+                    planId: ent?.plan_id || PLAN_ID,
+                    isTrial: Boolean(isTrial && !isPaid),
+                    trialExpiresAt: trialExpiresAt || null,
+                    trialExpiresAtMs: trialExpiresAtMs || null,
+                    trialDaysRemaining: trialDaysRemaining || 0
                 }
             });
         }
@@ -1176,8 +1535,7 @@ module.exports = async function handler(req, res) {
             }
 
             const email = normalizeEmail(meRes.data.email);
-            const entRes = await supaRest(`user_entitlements?email=eq.${encodeURIComponent(email)}&limit=1`);
-            const ent = Array.isArray(entRes.data) && entRes.data[0];
+            const { isActive, isPaid, isTrial, isTrialExpired, trialExpiresAt, trialExpiresAtMs, trialDaysRemaining, ent } = await verifyPaymentEntitlement(email);
 
             return sendJson(res, 200, {
                 ok: true,
@@ -1185,8 +1543,13 @@ module.exports = async function handler(req, res) {
                     id: meRes.data.id,
                     email,
                     name: meRes.data.user_metadata?.name || email.split('@')[0],
-                    subscriptionActive: ent?.status === 'active',
-                    planId: ent?.plan_id || PLAN_ID
+                    subscriptionActive: isActive,
+                    planId: ent?.plan_id || PLAN_ID,
+                    isTrial: Boolean(isTrial && !isPaid),
+                    isTrialExpired: Boolean(isTrialExpired),
+                    trialExpiresAt: trialExpiresAt || null,
+                    trialExpiresAtMs: trialExpiresAtMs || null,
+                    trialDaysRemaining: trialDaysRemaining || 0
                 }
             });
         }
@@ -1211,9 +1574,16 @@ module.exports = async function handler(req, res) {
             }
 
             const email = normalizeEmail(meRes.data.email);
-            const { isActive } = await verifyPaymentEntitlement(email);
+            const { isActive, isTrialExpired } = await verifyPaymentEntitlement(email);
             if (!isActive) {
-                return sendJson(res, 403, { ok: false, error: 'Assinatura não ativa para este Gmail.' });
+                return sendJson(res, isTrialExpired ? 402 : 403, {
+                    ok: false,
+                    code: isTrialExpired ? 'TRIAL_EXPIRED' : 'PAYMENT_REQUIRED',
+                    boundTrialEmail: isTrialExpired ? email : null,
+                    error: isTrialExpired
+                        ? `Seu teste grátis de 20 dias expirou! Realize o pagamento de ${formatBrl(PLAN_AMOUNT)} usando o Gmail ${email}.`
+                        : 'Assinatura não ativa para este Gmail.'
+                });
             }
 
             if (req.method === 'GET') {

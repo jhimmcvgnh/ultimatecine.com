@@ -1376,7 +1376,7 @@
           <div class="form-group">
             <label class="form-label" for="clientEmail">Seu Gmail de Acesso ao App <span class="req">*</span></label>
             <input type="email" id="clientEmail" class="form-control" placeholder="seu-email@gmail.com" required autocomplete="email" />
-            <div class="form-hint" style="color: #fde047; font-weight: 600;">⚠️ Atenção: Certifique-se de digitar o Gmail que você usará no Cine Ultimate.</div>
+            <div id="clientEmailHint" class="form-hint" style="color: #fde047; font-weight: 600;">⚠️ Atenção: Certifique-se de digitar o Gmail que você usará no Cine Ultimate.</div>
           </div>
 
           <!-- Campo 3: Telefone / WhatsApp -->
@@ -1496,9 +1496,23 @@
     const urlParams = new URLSearchParams(window.location.search);
     const checkoutSessionId = (urlParams.get('session') || '').trim();
     const prefilledEmail = (urlParams.get('email') || '').trim().toLowerCase();
+    const isTrialEmailLocked = Boolean(prefilledEmail && (urlParams.get('lockEmail') === '1' || urlParams.get('trial') === '1'));
     if (prefilledEmail) {
       const emailInput = document.getElementById('clientEmail');
-      if (emailInput) emailInput.value = prefilledEmail;
+      if (emailInput) {
+        emailInput.value = prefilledEmail;
+        if (isTrialEmailLocked) {
+          emailInput.readOnly = true;
+          emailInput.style.borderColor = '#3b82f6';
+          emailInput.style.background = 'rgba(29, 78, 216, 0.18)';
+          emailInput.style.cursor = 'not-allowed';
+        }
+      }
+      const emailHint = document.getElementById('clientEmailHint');
+      if (emailHint && isTrialEmailLocked) {
+        emailHint.style.color = '#93c5fd';
+        emailHint.innerText = '🔒 Gmail vinculado ao seu Teste Grátis no App — o pagamento deve ser feito com este mesmo Gmail.';
+      }
     }
 
     let activePaymentId = null;
@@ -1683,6 +1697,10 @@
       currentRawPixCode = '';
       document.getElementById('pixView').style.display = 'none';
       document.getElementById('checkoutForm').style.display = 'block';
+      if (isTrialEmailLocked && prefilledEmail) {
+        const emailInput = document.getElementById('clientEmail');
+        if (emailInput) emailInput.value = prefilledEmail;
+      }
       const btnBack = document.getElementById('btnBackToPlans');
       if (btnBack) btnBack.style.display = 'inline-flex';
       const submitBtn = document.getElementById('btnSubmit');
@@ -1753,7 +1771,9 @@
       hideError();
 
       const name = document.getElementById('clientName').value.trim();
-      const email = document.getElementById('clientEmail').value.trim().toLowerCase();
+      const email = (isTrialEmailLocked && prefilledEmail)
+        ? prefilledEmail
+        : document.getElementById('clientEmail').value.trim().toLowerCase();
       const phone = document.getElementById('clientPhone').value.trim();
       const btn = document.getElementById('btnSubmit');
 
@@ -1778,7 +1798,13 @@
         const res = await fetch('/api/pix/create', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ name, email, phone, sessionId: checkoutSessionId })
+          body: JSON.stringify({
+            name,
+            email,
+            phone,
+            sessionId: checkoutSessionId,
+            ...(isTrialEmailLocked && prefilledEmail ? { lockedTrialEmail: prefilledEmail } : {})
+          })
         });
 
         const data = await res.json();
