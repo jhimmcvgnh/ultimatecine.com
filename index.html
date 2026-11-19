@@ -581,6 +581,110 @@
       color: #ffffff;
     }
 
+    /* Banner Hero na Head do Checkout com a imagem dg.jpeg e Moldura Animada que Brilha */
+    .checkout-head-showcase {
+      position: relative;
+      width: 100%;
+      margin: 0 auto 22px;
+      perspective: 900px;
+    }
+
+    .checkout-head-aura {
+      position: absolute;
+      inset: -12px;
+      border-radius: 26px;
+      background: radial-gradient(
+        circle at 50% 48%,
+        rgba(37, 99, 235, 0.36),
+        rgba(23, 37, 84, 0.18) 56%,
+        transparent 78%
+      );
+      filter: blur(24px);
+      pointer-events: none;
+      animation: auraBreathe 3.2s ease-in-out infinite;
+    }
+
+    .checkout-head-frame {
+      position: relative;
+      z-index: 1;
+      border-radius: 20px;
+      padding: 2px;
+      background: #06080f;
+      overflow: hidden;
+      box-shadow:
+        0 24px 54px -16px rgba(0, 0, 0, 0.92),
+        0 0 24px -6px rgba(37, 99, 235, 0.42),
+        0 0 0 1px rgba(37, 99, 235, 0.28);
+    }
+
+    .checkout-head-border-runner {
+      position: absolute;
+      inset: 0;
+      border-radius: 20px;
+      overflow: hidden;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .checkout-head-border-beam {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      width: 260%;
+      aspect-ratio: 1 / 1;
+      transform: translate(-50%, -50%) rotate(0deg);
+      background: conic-gradient(
+        from 0deg,
+        transparent 0deg 55deg,
+        rgba(30, 58, 138, 0.45) 85deg,
+        rgba(59, 130, 246, 0.95) 122deg,
+        rgba(191, 219, 254, 0.85) 140deg,
+        rgba(29, 78, 216, 0.4) 165deg,
+        transparent 185deg 235deg,
+        rgba(23, 37, 84, 0.5) 265deg,
+        rgba(37, 99, 235, 0.92) 305deg,
+        rgba(147, 197, 253, 0.78) 325deg,
+        rgba(30, 58, 138, 0.32) 348deg,
+        transparent 360deg
+      );
+      animation: spinBorderLight 5.2s linear infinite;
+      opacity: 0.98;
+    }
+
+    .checkout-head-inner {
+      position: relative;
+      z-index: 1;
+      border-radius: 18px;
+      overflow: hidden;
+      background: #05070c;
+    }
+
+    .checkout-head-img {
+      display: block;
+      width: 100%;
+      height: auto;
+      border-radius: 18px;
+      object-fit: cover;
+      user-select: none;
+      -webkit-user-drag: none;
+    }
+
+    .checkout-head-inner::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      border-radius: 18px;
+      pointer-events: none;
+      box-shadow: inset 0 0 0 1px rgba(147, 197, 253, 0.16);
+      background: linear-gradient(
+        180deg,
+        rgba(59, 130, 246, 0.06) 0%,
+        transparent 22%,
+        transparent 82%,
+        rgba(5, 7, 15, 0.38) 100%
+      );
+    }
+
     .section-heading {
       font-size: 18px;
       font-weight: 700;
@@ -1301,6 +1405,24 @@
           </svg>
           Trocar plano
         </button>
+      </div>
+
+      <!-- Imagem na Head do Checkout com a Moldura Animada que Brilha -->
+      <div class="checkout-head-showcase">
+        <span class="checkout-head-aura" aria-hidden="true"></span>
+        <div class="checkout-head-frame">
+          <span class="checkout-head-border-runner" aria-hidden="true">
+            <span class="checkout-head-border-beam"></span>
+          </span>
+          <div class="checkout-head-inner">
+            <img
+              src="/drawable/dg.jpeg"
+              onerror="this.onerror=null; this.src='drawable/dg.jpeg';"
+              alt="Cine Ultimate Catálogo 4K"
+              class="checkout-head-img"
+            />
+          </div>
+        </div>
       </div>
 
       <!-- Bloco 1: "Seu Plano" (estilo "Your Cart" da Imagem 2) -->
